@@ -1,76 +1,22 @@
-body {
-    font-family: 'Courier New', monospace;
-    background-color: #000;
-    color: #00ff41;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    background-size: 100% 2px, 3px 100%;
-}
-
-.container {
-    width: 95%;
-    max-width: 500px;
-    background: rgba(0, 10, 0, 0.95);
-    padding: 20px;
-    border: 2px solid #00ff41;
-    box-shadow: 0 0 20px #00ff41;
-    text-align: center;
-}
-
-nav {
-    margin-bottom: 20px;
-    padding: 10px;
-    border-bottom: 1px solid #004411;
-}
-
-nav a {
-    color: #00ff41;
-    cursor: pointer;
-    font-size: 0.8rem;
-    text-decoration: none;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #00ff41;
-    background: #000;
-    color: #00ff41;
-    box-sizing: border-box;
-    font-family: 'Courier New', monospace;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background: transparent;
-    color: #00ff41;
-    border: 1px solid #00ff41;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
-    text-transform: uppercase;
-}
-
-button:hover {
-    background: #00ff41;
-    color: #000;
-}
-
-#chat-box, #learning-list {
+.display-area {
     height: 300px;
     border: 1px solid #004411;
     overflow-y: auto;
     padding: 10px;
-    text-align: left;
     margin-bottom: 10px;
+    background: rgba(0, 5, 0, 0.8);
 }
 
-p {
-    margin: 5px 0;
-    font-size: 0.9rem;
+.user-node {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #004411;
+    padding: 10px 0;
+}
+
+.resource-card {
+    border-left: 3px solid #00ff41;
+    padding-left: 10px;
+    margin-bottom: 15px;
 }
