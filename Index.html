@@ -1,67 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News & Chat Hub</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Live News & Chat</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
+        #chat-box { height: 300px; border: 2px solid #333; overflow-y: scroll; padding: 10px; background: white; margin: 10px auto; max-width: 500px; text-align: left; }
+        input { width: 60%; padding: 10px; }
+        button { padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
 
-    <header>
-        <h1>Global News & Chat</h1>
-        <nav>
-            <button onclick="showSection('news')">News</button>
-            <button onclick="showSection('chat')">Chat Room</button>
-            <button id="authBtn">Sign Up / Login</button>
-        </nav>
-    </header>
+    <h1>Global News & Chat</h1>
+    
+    <div id="chat-box">
+        <p><i>Loading messages...</i></p>
+    </div>
 
-    <main>
-        <!-- News Section -->
-        <section id="news" class="card">
-            <h2>Latest Headlines</h2>
-            <article class="news-item">
-                <h3>AI Revolutionizes Web Design</h3>
-                <p>New tools allow beginners to build complex apps in minutes...</p>
-            </article>
-            <article class="news-item">
-                <h3>SpaceX Mars Update</h3>
-                <p>The latest launch window has been announced for 2026...</p>
-            </article>
-        </section>
-
-        <!-- Chat Section -->
-        <section id="chat" class="card" style="display:none;">
-            <h2>Community Chat</h2>
-            <div id="chat-box" style="height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
-                <p><strong>System:</strong> Welcome to the chat! Please sign in to post.</p>
-            </div>
-            <div class="chat-input">
-                <input type="text" id="messageInput" placeholder="Type a message...">
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </section>
-    </main>
+    <input id="msg" placeholder="Type a message...">
+    <button onclick="send()">Send</button>
 
     <script>
-        function showSection(sectionId) {
-            document.getElementById('news').style.display = 'none';
-            document.getElementById('chat').style.display = 'none';
-            document.getElementById(sectionId).style.display = 'block';
-        }
+      // Your specific Firebase keys
+      const firebaseConfig = {
+        apiKey: "AIzaSyAy19nnMz2BH-vJ0w27sfMYD6IhlWUothQ",
+        authDomain: "my-chat-944a0.firebaseapp.com",
+        projectId: "my-chat-944a0",
+        storageBucket: "my-chat-944a0.firebasestorage.app",
+        messagingSenderId: "176386861788",
+        appId: "1:176386861788:web:b2cf1263b4774138c4a219",
+        databaseURL: "https://my-chat-944a0-default-rtdb.firebaseio.com"
+      };
 
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            if(input.value.trim() !== "") {
-                const chatBox = document.getElementById('chat-box');
-                const msg = document.createElement('p');
-                msg.innerHTML = `<strong>You:</strong> ${input.value}`;
-                chatBox.appendChild(msg);
-                input.value = "";
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        }
+      // Initialize
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+      // Send Message
+      function send() {
+          const text = document.getElementById('msg').value;
+          if(text.trim() !== "") {
+              db.ref("messages").push({ text: text });
+              document.getElementById('msg').value = "";
+          }
+      }
+
+      // Receive Messages
+      db.ref("messages").on("child_added", (snapshot) => {
+          const chatBox = document.getElementById('chat-box');
+          if(chatBox.innerHTML.includes("Loading")) chatBox.innerHTML = "";
+          const p = document.createElement('p');
+          p.innerHTML = "<b>User:</b> " + snapshot.val().text;
+          chatBox.appendChild(p);
+          chatBox.scrollTop = chatBox.scrollHeight;
+      });
     </script>
 </body>
 </html>
