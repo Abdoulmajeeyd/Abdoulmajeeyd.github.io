@@ -1,42 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Website</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News & Chat Hub</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <h1>Welcome</h1>
-    <p>This is my GitHub Pages website</p>
-  </header>
+    <header>
+        <h1>Global News & Chat</h1>
+        <nav>
+            <button onclick="showSection('news')">News</button>
+            <button onclick="showSection('chat')">Chat Room</button>
+            <button id="authBtn">Sign Up / Login</button>
+        </nav>
+    </header>
 
-  <main>
-    <section class="card">
-      <h2>About Me</h2>
-      <p>I am building my first website using GitHub Pages.</p>
-    </section>
+    <main>
+        <!-- News Section -->
+        <section id="news" class="card">
+            <h2>Latest Headlines</h2>
+            <article class="news-item">
+                <h3>AI Revolutionizes Web Design</h3>
+                <p>New tools allow beginners to build complex apps in minutes...</p>
+            </article>
+            <article class="news-item">
+                <h3>SpaceX Mars Update</h3>
+                <p>The latest launch window has been announced for 2026...</p>
+            </article>
+        </section>
 
-    <section class="card">
-      <h2>Projects</h2>
-      <ul>
-        <li>Project 1</li>
-        <li>Project 2</li>
-        <li>Project 3</li>
-      </ul>
-    </section>
+        <!-- Chat Section -->
+        <section id="chat" class="card" style="display:none;">
+            <h2>Community Chat</h2>
+            <div id="chat-box" style="height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                <p><strong>System:</strong> Welcome to the chat! Please sign in to post.</p>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </section>
+    </main>
 
-    <section class="card">
-      <h2>Contact</h2>
-      <p>Email: example@email.com</p>
-    </section>
-  </main>
+    <script>
+        function showSection(sectionId) {
+            document.getElementById('news').style.display = 'none';
+            document.getElementById('chat').style.display = 'none';
+            document.getElementById(sectionId).style.display = 'block';
+        }
 
-  <footer>
-    <p>© 2026 My Website</p>
-  </footer>
-
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            if(input.value.trim() !== "") {
+                const chatBox = document.getElementById('chat-box');
+                const msg = document.createElement('p');
+                msg.innerHTML = `<strong>You:</strong> ${input.value}`;
+                chatBox.appendChild(msg);
+                input.value = "";
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+    </script>
 </body>
 </html>
