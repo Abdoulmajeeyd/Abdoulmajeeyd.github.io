@@ -1,15 +1,15 @@
-/* Hacker Terminal Styling */
 body {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Courier New', monospace;
     background-color: #000;
-    background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    background-size: 100% 2px, 3px 100%;
-    color: #00ff41; /* Classic Matrix Green */
+    color: #00ff41;
     margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
+    /* This adds a flickering "old monitor" look */
+    background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
 }
 
 .container {
@@ -18,16 +18,7 @@ body {
     background: rgba(0, 20, 0, 0.9);
     padding: 30px;
     border: 2px solid #00ff41;
-    border-radius: 5px;
     box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
-}
-
-h1, h2 {
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 0 0 10px #00ff41;
-    border-bottom: 1px solid #00ff41;
-    padding-bottom: 10px;
 }
 
 input {
@@ -37,13 +28,7 @@ input {
     border: 1px solid #00ff41;
     background: #000;
     color: #00ff41;
-    font-family: 'Courier New', monospace;
     box-sizing: border-box;
-    outline: none;
-}
-
-input:focus {
-    box-shadow: 0 0 10px #00ff41;
 }
 
 button {
@@ -52,58 +37,19 @@ button {
     border: 1px solid #00ff41;
     background: transparent;
     color: #00ff41;
-    font-weight: bold;
     text-transform: uppercase;
     cursor: pointer;
-    transition: all 0.3s;
 }
 
 button:hover {
     background: #00ff41;
     color: #000;
-    box-shadow: 0 0 20px #00ff41;
 }
 
 #chat-box {
     height: 300px;
-    background: rgba(0, 5, 0, 0.5);
     border: 1px solid #004411;
     padding: 15px;
     margin-bottom: 15px;
     overflow-y: auto;
 }
-
-/* Message Styling */
-p {
-    margin: 5px 0;
-    padding: 5px;
-    border-left: 2px solid #00ff41;
-    animation: type 0.5s steps(40, end);
-}
-
-nav {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
-    border: 1px solid #004411;
-    padding: 10px;
-}
-
-nav a {
-    color: #00ff41;
-    text-decoration: none;
-    font-size: 0.8rem;
-}
-
-/* Scrollbar for Hacker look */
-#chat-box::-webkit-scrollbar {
-    width: 5px;
-}
-#chat-box::-webkit-scrollbar-thumb {
-    background: #00ff41;
-}
-@keyframes type {
-  from { width: 0; }
-  to { width: 100%; }
-}
- 
