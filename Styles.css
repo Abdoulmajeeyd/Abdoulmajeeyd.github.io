@@ -1,31 +1,37 @@
-/* General page styling */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
+/* Styling for the News and Chat sections */
+.news-item {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
 }
 
-/* Styling your header */
-header {
-    text-align: center;
-    padding: 20px;
-    background: #333;
+.news-item h3 {
+    color: #007bff;
+    margin-top: 0;
+}
+
+nav button {
+    background: #444;
     color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-right: 5px;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
-/* This targets the 'class="card"' sections from your HTML */
-.card {
-    background: white;
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+nav button:hover {
+    background: #666;
 }
 
-footer {
-    text-align: center;
-    margin-top: 50px;
-    font-size: 0.8rem;
+.chat-input {
+    display: flex;
+    gap: 10px;
 }
 
+.chat-input input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
