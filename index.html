@@ -1,61 +1,131 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Live News & Chat</title>
+    <title>News, Chat & Profiles</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
-        #chat-box { height: 300px; border: 2px solid #333; overflow-y: scroll; padding: 10px; background: white; margin: 10px auto; max-width: 500px; text-align: left; }
-        input { width: 60%; padding: 10px; }
-        button { padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        input { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #chat-box { height: 300px; border: 1px solid #eee; overflow-y: scroll; text-align: left; padding: 10px; margin-bottom: 10px; }
+        nav { margin-bottom: 20px; }
+        nav a { margin: 0 10px; cursor: pointer; color: #007bff; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <h1>Global News & Chat</h1>
-    
-    <div id="chat-box">
-        <p><i>Loading messages...</i></p>
+    <div class="container">
+        <!-- 1. AUTH SECTION -->
+        <div id="auth-section">
+            <h2>Sign Up / Login</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <br>
+            <button onclick="signUp()">Sign Up</button>
+            <button onclick="login()" style="background:#28a745">Login</button>
+        </div>
+
+        <!-- 2. SIGNED IN CONTENT -->
+        <div id="main-content" style="display:none;">
+            <nav>
+                <a onclick="showPage('chat')">Chat</a> | 
+                <a onclick="showPage('profile')">Profile</a> | 
+                <a onclick="logout()">Logout</a>
+            </nav>
+
+            <!-- Chat Page -->
+            <div id="page-chat">
+                <div id="chat-box"></div>
+                <input id="chat-input" placeholder="Type a message...">
+                <button onclick="sendMsg()">Send</button>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="page-profile" style="display:none;">
+                <h2>Your Profile</h2>
+                <p id="user-email-display"></p>
+                <input type="text" id="username-input" placeholder="Update Username">
+                <button onclick="updateUsername()">Save Name</button>
+            </div>
+        </div>
     </div>
 
-    <input id="msg" placeholder="Type a message...">
-    <button onclick="send()">Send</button>
-
     <script>
-      // Your specific Firebase keys
-      const firebaseConfig = {
-        apiKey: "AIzaSyAy19nnMz2BH-vJ0w27sfMYD6IhlWUothQ",
-        authDomain: "my-chat-944a0.firebaseapp.com",
-        projectId: "my-chat-944a0",
-        storageBucket: "my-chat-944a0.firebasestorage.app",
-        messagingSenderId: "176386861788",
-        appId: "1:176386861788:web:b2cf1263b4774138c4a219",
-        databaseURL: "https://my-chat-944a0-default-rtdb.firebaseio.com"
-      };
+        // PASTE YOUR FIREBASE CONFIG HERE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAy19nnMz2BH-vJ0w27sfMYD6IhlWUothQ",
+            authDomain: "my-chat-944a0.firebaseapp.com",
+            projectId: "my-chat-944a0",
+            storageBucket: "my-chat-944a0.firebasestorage.app",
+            messagingSenderId: "176386861788",
+            appId: "1:176386861788:web:b2cf1263b4774138c4a219",
+            databaseURL: "https://my-chat-944a0-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-      // Initialize
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.database();
+        // --- AUTH LOGIC ---
+        function signUp() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            auth.createUserWithEmailAndPassword(e, p).catch(err => alert(err.message));
+        }
 
-      // Send Message
-      function send() {
-          const text = document.getElementById('msg').value;
-          if(text.trim() !== "") {
-              db.ref("messages").push({ text: text });
-              document.getElementById('msg').value = "";
-          }
-      }
+        function login() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
+        }
 
-      // Receive Messages
-      db.ref("messages").on("child_added", (snapshot) => {
-          const chatBox = document.getElementById('chat-box');
-          if(chatBox.innerHTML.includes("Loading")) chatBox.innerHTML = "";
-          const p = document.createElement('p');
-          p.innerHTML = "<b>User:</b> " + snapshot.val().text;
-          chatBox.appendChild(p);
-          chatBox.scrollTop = chatBox.scrollHeight;
-      });
+        function logout() { auth.signOut(); location.reload(); }
+
+        // Track user state
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('user-email-display').innerText = "Logged in as: " + user.email;
+                loadProfile(user.uid);
+            }
+        });
+
+        // --- PROFILE LOGIC ---
+        function updateUsername() {
+            const name = document.getElementById('username-input').value;
+            db.ref('profiles/' + auth.currentUser.uid).set({ username: name });
+            alert("Name updated!");
+        }
+
+        let currentUsername = "Guest";
+        function loadProfile(uid) {
+            db.ref('profiles/' + uid).on('value', snap => {
+                if(snap.val()) currentUsername = snap.val().username;
+            });
+        }
+
+        // --- CHAT LOGIC ---
+        function sendMsg() {
+            const text = document.getElementById('chat-input').value;
+            db.ref('messages').push({ name: currentUsername, text: text });
+            document.getElementById('chat-input').value = "";
+        }
+
+        db.ref('messages').limitToLast(10).on('child_added', snap => {
+            const m = snap.val();
+            const p = document.createElement('p');
+            p.innerHTML = `<b>${m.name}:</b> ${m.text}`;
+            document.getElementById('chat-box').appendChild(p);
+        });
+
+        // --- UI NAVIGATION ---
+        function showPage(page) {
+            document.getElementById('page-chat').style.display = page === 'chat' ? 'block' : 'none';
+            document.getElementById('page-profile').style.display = page === 'profile' ? 'block' : 'none';
+        }
     </script>
 </body>
 </html>
