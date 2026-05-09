@@ -1,214 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANONYCHAT</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<title>ANONYCHAT</title>
 
-    <style>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-        body{
-            margin:0;
-            font-family:Arial, sans-serif;
-            background:#0f0f0f;
-            color:white;
-        }
+<style>
 
-        .container{
-            width:95%;
-            max-width:900px;
-            margin:auto;
-            margin-top:20px;
-        }
+body{
+    margin:0;
+    background:black;
+    color:#00ff66;
+    font-family:Courier New, monospace;
+}
 
-        input{
-            width:100%;
-            padding:12px;
-            margin-top:10px;
-            border:none;
-            border-radius:8px;
-            box-sizing:border-box;
-        }
+.container{
+    width:95%;
+    max-width:1200px;
+    margin:auto;
+    padding-top:20px;
+}
 
-        button{
-            padding:10px 15px;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
-            margin-top:10px;
-            background:#007bff;
-            color:white;
-        }
+.panel{
+    border:1px solid #00ff66;
+    padding:15px;
+    margin-bottom:15px;
+    background:#050505;
+    box-shadow:0 0 10px #00ff66;
+}
 
-        button:hover{
-            opacity:0.9;
-        }
+h1,h2,h3{
+    color:#00ff66;
+}
 
-        nav{
-            margin-bottom:20px;
-            padding:10px;
-            background:#1e1e1e;
-            border-radius:10px;
-        }
+input, select{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    background:black;
+    color:#00ff66;
+    border:1px solid #00ff66;
+    box-sizing:border-box;
+    font-family:Courier New;
+}
 
-        nav a{
-            color:#00bfff;
-            cursor:pointer;
-            margin-right:15px;
-            text-decoration:none;
-        }
+button{
+    background:black;
+    color:#00ff66;
+    border:1px solid #00ff66;
+    padding:10px;
+    cursor:pointer;
+    margin-top:10px;
+    font-family:Courier New;
+}
 
-        .chat-layout{
-            display:flex;
-            gap:20px;
-            flex-wrap:wrap;
-        }
+button:hover{
+    background:#00ff66;
+    color:black;
+}
 
-        .users-panel{
-            width:250px;
-            background:#1c1c1c;
-            padding:15px;
-            border-radius:10px;
-            height:500px;
-            overflow-y:auto;
-        }
+nav{
+    margin-bottom:15px;
+}
 
-        .chat-panel{
-            flex:1;
-            background:#1c1c1c;
-            padding:15px;
-            border-radius:10px;
-            display:flex;
-            flex-direction:column;
-            height:500px;
-        }
+nav a{
+    margin-right:15px;
+    cursor:pointer;
+    color:#00ff66;
+}
 
-        #chat-box{
-            flex:1;
-            overflow-y:auto;
-            background:#111;
-            padding:10px;
-            border-radius:10px;
-            margin-bottom:10px;
-        }
+.layout{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
 
-        .message{
-            margin-bottom:10px;
-            padding:10px;
-            border-radius:10px;
-            background:#2c2c2c;
-        }
+.users-panel{
+    width:250px;
+}
 
-        .my-message{
-            background:#005eff;
-        }
+.chat-panel{
+    flex:1;
+}
 
-        .user-btn{
-            width:100%;
-            text-align:left;
-            margin-bottom:10px;
-            background:#292929;
-        }
+.chat-box{
+    height:400px;
+    overflow-y:auto;
+    border:1px solid #00ff66;
+    padding:10px;
+    background:black;
+    margin-bottom:10px;
+}
 
-        .chat-input-area{
-            display:flex;
-            gap:10px;
-        }
+.message{
+    margin-bottom:10px;
+    padding:8px;
+    border-left:3px solid #00ff66;
+    background:#0d0d0d;
+    word-wrap:break-word;
+}
 
-        .chat-input-area input{
-            flex:1;
-            margin-top:0;
-        }
+.system{
+    color:#888;
+}
 
-        @media(max-width:700px){
+.chat-input{
+    display:flex;
+    gap:10px;
+}
 
-            .chat-layout{
-                flex-direction:column;
-            }
+.chat-input input{
+    flex:1;
+    margin-top:0;
+}
 
-            .users-panel{
-                width:100%;
-                height:200px;
-            }
+.user-btn{
+    width:100%;
+    text-align:left;
+    margin-bottom:10px;
+}
 
-            .chat-panel{
-                height:500px;
-            }
+.private-active{
+    background:#00ff66;
+    color:black;
+}
 
-        }
+@media(max-width:800px){
 
-    </style>
+    .layout{
+        flex-direction:column;
+    }
+
+    .users-panel{
+        width:100%;
+    }
+
+}
+
+</style>
+
 </head>
 <body>
 
 <div class="container">
 
-    <!-- AUTH -->
-    <div id="auth-section">
+    <!-- LOGIN -->
+    <div id="auth-section" class="panel">
 
-        <h2>ANONYCHAT</h2>
+        <h1>ANONYCHAT TERMINAL</h1>
 
-        <input type="email" id="email" placeholder="Email">
+        <input type="email" id="email" placeholder="EMAIL">
 
-        <input type="password" id="password" placeholder="Password">
+        <input type="password" id="password" placeholder="PASSWORD">
 
-        <button onclick="signUp()">Sign Up</button>
+        <button onclick="signUp()">REGISTER</button>
 
-        <button onclick="login()" style="background:#28a745;">
-            Login
-        </button>
+        <button onclick="login()">LOGIN</button>
 
     </div>
 
     <!-- MAIN -->
     <div id="main-content" style="display:none;">
 
-        <nav>
-            <a onclick="showPage('chat')">Chat</a>
+        <nav class="panel">
 
-            <a onclick="showPage('profile')">Profile</a>
+            <a onclick="showPage('chat')">CHAT</a>
 
-            <a onclick="logout()">Logout</a>
+            <a onclick="showPage('profile')">PROFILE</a>
+
+            <a onclick="logout()">LOGOUT</a>
+
         </nav>
 
         <!-- CHAT PAGE -->
         <div id="page-chat">
 
-            <div class="chat-layout">
+            <div class="layout">
 
                 <!-- USERS -->
-                <div class="users-panel">
+                <div class="users-panel panel">
 
-                    <h3>Users</h3>
+                    <h3>PRIVATE USERS</h3>
+
+                    <button onclick="openGlobalChat()">
+                        GLOBAL CHAT
+                    </button>
+
+                    <hr style="border-color:#00ff66;">
 
                     <div id="users-list"></div>
 
                 </div>
 
                 <!-- CHAT -->
-                <div class="chat-panel">
+                <div class="chat-panel panel">
 
                     <h3 id="chat-title">
-                        Select a user
+                        GLOBAL CHAT
                     </h3>
 
-                    <div id="chat-box"></div>
+                    <div id="chat-box" class="chat-box"></div>
 
-                    <div class="chat-input-area">
+                    <div class="chat-input">
 
                         <input
                             type="text"
                             id="chat-input"
-                            placeholder="Type message..."
+                            placeholder="ENTER MESSAGE..."
                         >
 
                         <button onclick="sendMsg()">
-                            Send
+                            SEND
                         </button>
 
                     </div>
@@ -219,21 +227,29 @@
 
         </div>
 
-        <!-- PROFILE PAGE -->
-        <div id="page-profile" style="display:none;">
+        <!-- PROFILE -->
+        <div id="page-profile" style="display:none;" class="panel">
 
-            <h2>Your Profile</h2>
+            <h2>PROFILE SETTINGS</h2>
 
             <p id="user-email-display"></p>
 
             <input
                 type="text"
                 id="username-input"
-                placeholder="Choose username"
+                placeholder="USERNAME"
             >
 
-            <button onclick="updateUsername()">
-                Save Username
+            <label>CHAT COLOR</label>
+
+            <input
+                type="color"
+                id="color-input"
+                value="#00ff66"
+            >
+
+            <button onclick="updateProfile()">
+                SAVE PROFILE
             </button>
 
         </div>
@@ -244,356 +260,404 @@
 
 <script>
 
-    // FIREBASE CONFIG
-    const firebaseConfig = {
+const firebaseConfig = {
 
-        apiKey: "AIzaSyAy19nnMz2BH-vJ0w27sfMYD6IhlWUothQ",
+    apiKey: "AIzaSyAy19nnMz2BH-vJ0w27sfMYD6IhlWUothQ",
 
-        authDomain: "my-chat-944a0.firebaseapp.com",
+    authDomain: "my-chat-944a0.firebaseapp.com",
 
-        databaseURL: "https://my-chat-944a0-default-rtdb.firebaseio.com",
+    projectId: "my-chat-944a0",
 
-        projectId: "my-chat-944a0",
+    storageBucket: "my-chat-944a0.firebasestorage.app",
 
-        storageBucket: "my-chat-944a0.firebasestorage.app",
+    messagingSenderId: "176386861788",
 
-        messagingSenderId: "176386861788",
+    appId: "1:176386861788:web:b2cf1263b4774138c4a219",
 
-        appId: "1:176386861788:web:b2cf1263b4774138c4a219"
+    databaseURL: "https://my-chat-944a0-default-rtdb.firebaseio.com"
 
-    };
+};
 
-    firebase.initializeApp(firebaseConfig);
+};
 
-    const auth = firebase.auth();
+firebase.initializeApp(firebaseConfig);
 
-    const db = firebase.database();
+const auth = firebase.auth();
 
-    // GLOBAL VARIABLES
-    let currentUsername = "Guest";
+const db = firebase.database();
 
-    let selectedUser = null;
+let currentUsername = "Guest";
 
-    let currentChatId = null;
+let currentColor = "#00ff66";
 
-    // SIGN UP
-    function signUp(){
+let currentChatType = "global";
 
-        const email =
-            document.getElementById('email').value;
+let selectedUser = null;
 
-        const password =
-            document.getElementById('password').value;
+let currentChatId = null;
 
-        auth.createUserWithEmailAndPassword(
-            email,
-            password
-        )
-        .catch(err => alert(err.message));
+
+// AUTH
+function signUp(){
+
+    const email =
+        document.getElementById('email').value;
+
+    const password =
+        document.getElementById('password').value;
+
+    auth.createUserWithEmailAndPassword(
+        email,
+        password
+    )
+    .catch(err => alert(err.message));
+
+}
+
+function login(){
+
+    const email =
+        document.getElementById('email').value;
+
+    const password =
+        document.getElementById('password').value;
+
+    auth.signInWithEmailAndPassword(
+        email,
+        password
+    )
+    .catch(err => alert(err.message));
+
+}
+
+function logout(){
+
+    auth.signOut();
+
+    location.reload();
+
+}
+
+
+// AUTH STATE
+auth.onAuthStateChanged(user => {
+
+    if(user){
+
+        document.getElementById(
+            'auth-section'
+        ).style.display = 'none';
+
+        document.getElementById(
+            'main-content'
+        ).style.display = 'block';
+
+        document.getElementById(
+            'user-email-display'
+        ).innerText =
+            "LOGGED IN: " + user.email;
+
+        db.ref('users/' + user.uid).set({
+
+            email:user.email
+
+        });
+
+        loadProfile(user.uid);
+
+        loadUsers();
+
+        openGlobalChat();
 
     }
 
-    // LOGIN
-    function login(){
+});
 
-        const email =
-            document.getElementById('email').value;
 
-        const password =
-            document.getElementById('password').value;
+// PROFILE
+function updateProfile(){
 
-        auth.signInWithEmailAndPassword(
-            email,
-            password
-        )
-        .catch(err => alert(err.message));
+    const username =
+        document.getElementById(
+            'username-input'
+        ).value;
 
-    }
+    const color =
+        document.getElementById(
+            'color-input'
+        ).value;
 
-    // LOGOUT
-    function logout(){
+    db.ref(
+        'profiles/' + auth.currentUser.uid
+    ).set({
 
-        auth.signOut();
+        username:username,
 
-        location.reload();
+        color:color
 
-    }
+    });
 
-    // AUTH STATE
-    auth.onAuthStateChanged(user => {
+    currentUsername = username;
 
-        if(user){
+    currentColor = color;
+
+    alert("PROFILE UPDATED");
+
+}
+
+function loadProfile(uid){
+
+    db.ref('profiles/' + uid)
+    .on('value', snap => {
+
+        if(snap.val()){
+
+            currentUsername =
+                snap.val().username ||
+                auth.currentUser.email;
+
+            currentColor =
+                snap.val().color ||
+                "#00ff66";
 
             document.getElementById(
-                'auth-section'
-            ).style.display = 'none';
+                'username-input'
+            ).value =
+                currentUsername;
 
             document.getElementById(
-                'main-content'
-            ).style.display = 'block';
-
-            document.getElementById(
-                'user-email-display'
-            ).innerText =
-                "Logged in as: " + user.email;
-
-            // SAVE USER
-            db.ref('users/' + user.uid).set({
-
-                email:user.email
-
-            });
-
-            loadProfile(user.uid);
-
-            loadUsers();
+                'color-input'
+            ).value =
+                currentColor;
 
         }
 
     });
 
-    // PROFILE
-    function updateUsername(){
+}
 
-        const username =
+
+// USERS
+function loadUsers(){
+
+    db.ref('users')
+    .on('value', snap => {
+
+        const usersDiv =
             document.getElementById(
-                'username-input'
-            ).value;
+                'users-list'
+            );
 
-        if(username.trim() === ""){
+        usersDiv.innerHTML = "";
 
-            alert("Username required");
+        snap.forEach(child => {
 
-            return;
+            const user = child.val();
 
-        }
+            const uid = child.key;
 
-        db.ref(
-            'profiles/' + auth.currentUser.uid
-        ).set({
+            if(uid !== auth.currentUser.uid){
 
-            username:username
+                const btn =
+                    document.createElement(
+                        'button'
+                    );
 
-        });
+                btn.className = "user-btn";
 
-        currentUsername = username;
+                btn.textContent =
+                    user.email;
 
-        alert("Username updated");
+                btn.onclick = () =>
+                    openPrivateChat(
+                        uid,
+                        user.email
+                    );
 
-    }
-
-    // LOAD PROFILE
-    function loadProfile(uid){
-
-        db.ref('profiles/' + uid)
-        .on('value', snap => {
-
-            if(
-                snap.val() &&
-                snap.val().username
-            ){
-
-                currentUsername =
-                    snap.val().username;
-
-                document.getElementById(
-                    'username-input'
-                ).value =
-                    currentUsername;
-
-            }else{
-
-                currentUsername =
-                    auth.currentUser.email;
+                usersDiv.appendChild(btn);
 
             }
 
         });
 
-    }
+    });
 
-    // LOAD USERS
-    function loadUsers(){
+}
 
-        db.ref('users')
-        .on('value', snap => {
 
-            const usersDiv =
-                document.getElementById(
-                    'users-list'
-                );
+// CHAT IDS
+function generateChatId(uid1, uid2){
 
-            usersDiv.innerHTML = "";
+    return [uid1, uid2]
+    .sort()
+    .join("_");
 
-            snap.forEach(child => {
+}
 
-                const user = child.val();
 
-                const uid = child.key;
+// GLOBAL CHAT
+function openGlobalChat(){
 
-                if(uid !== auth.currentUser.uid){
+    currentChatType = "global";
 
-                    const btn =
-                        document.createElement(
-                            'button'
-                        );
+    selectedUser = null;
 
-                    btn.className = "user-btn";
+    document.getElementById(
+        'chat-title'
+    ).innerText =
+        "GLOBAL CHAT";
 
-                    btn.innerText =
-                        user.email;
+    document.getElementById(
+        'chat-box'
+    ).innerHTML = "";
 
-                    btn.onclick = () =>
-                        openPrivateChat(
-                            uid,
-                            user.email
-                        );
+    db.ref('globalMessages')
+    .off();
 
-                    usersDiv.appendChild(btn);
+    db.ref('globalMessages')
+    .limitToLast(100)
+    .on('child_added', snap => {
 
-                }
+        renderMessage(snap.val());
 
-            });
+    });
 
-        });
+}
 
-    }
 
-    // GENERATE CHAT ID
-    function generateChatId(uid1, uid2){
+// PRIVATE CHAT
+function openPrivateChat(uid, email){
 
-        return [uid1, uid2]
-        .sort()
-        .join("_");
+    currentChatType = "private";
 
-    }
+    selectedUser = uid;
 
-    // OPEN CHAT
-    function openPrivateChat(uid, email){
+    currentChatId =
+        generateChatId(
+            auth.currentUser.uid,
+            uid
+        );
 
-        selectedUser = uid;
+    document.getElementById(
+        'chat-title'
+    ).innerText =
+        "PRIVATE CHAT: " + email;
 
-        currentChatId =
-            generateChatId(
-                auth.currentUser.uid,
-                uid
-            );
+    document.getElementById(
+        'chat-box'
+    ).innerHTML = "";
 
-        document.getElementById(
-            'chat-title'
-        ).innerText =
-            "Chat with " + email;
+    db.ref(
+        'privateChats/' + currentChatId
+    ).off();
 
+    db.ref(
+        'privateChats/' + currentChatId
+    )
+    .limitToLast(100)
+    .on('child_added', snap => {
+
+        renderMessage(snap.val());
+
+    });
+
+}
+
+
+// RENDER MESSAGE
+function renderMessage(m){
+
+    const div =
+        document.createElement('div');
+
+    div.className = "message";
+
+    div.style.borderLeftColor =
+        m.color || "#00ff66";
+
+    div.innerHTML =
+        "<strong style='color:" +
+        (m.color || "#00ff66") +
+        "'>" +
+        m.name +
+        ":</strong><br>" +
+        m.text;
+
+    document.getElementById(
+        'chat-box'
+    ).appendChild(div);
+
+    const box =
         document.getElementById(
             'chat-box'
-        ).innerHTML = "";
+        );
 
-        db.ref(
-            'privateChats/' + currentChatId
-        ).off();
+    box.scrollTop = box.scrollHeight;
 
-        db.ref(
-            'privateChats/' + currentChatId
-        )
-        .limitToLast(100)
-        .on('child_added', snap => {
+}
 
-            const m = snap.val();
 
-            const div =
-                document.createElement('div');
+// SEND MESSAGE
+function sendMsg(){
 
-            div.className = "message";
-
-            if(
-                m.sender ===
-                auth.currentUser.uid
-            ){
-
-                div.classList.add(
-                    'my-message'
-                );
-
-            }
-
-            div.textContent =
-                m.name + ": " + m.text;
-
-            document.getElementById(
-                'chat-box'
-            ).appendChild(div);
-
-            document.getElementById(
-                'chat-box'
-            ).scrollTop =
-                document.getElementById(
-                    'chat-box'
-                ).scrollHeight;
-
-        });
-
-    }
-
-    // SEND MESSAGE
-    function sendMsg(){
-
-        const input =
-            document.getElementById(
-                'chat-input'
-            );
-
-        const text = input.value;
-
-        if(!selectedUser){
-
-            alert("Select user first");
-
-            return;
-
-        }
-
-        if(text.trim() === ""){
-
-            return;
-
-        }
-
-        db.ref(
-            'privateChats/' + currentChatId
-        ).push({
-
-            sender:auth.currentUser.uid,
-
-            name:currentUsername,
-
-            text:text,
-
-            timestamp:Date.now()
-
-        });
-
-        input.value = "";
-
-    }
-
-    // PAGE NAVIGATION
-    function showPage(page){
-
+    const input =
         document.getElementById(
-            'page-chat'
-        ).style.display =
-            page === 'chat'
-            ? 'block'
-            : 'none';
+            'chat-input'
+        );
 
-        document.getElementById(
-            'page-profile'
-        ).style.display =
-            page === 'profile'
-            ? 'block'
-            : 'none';
+    const text = input.value;
+
+    if(text.trim() === "") return;
+
+    const msg = {
+
+        sender:auth.currentUser.uid,
+
+        name:currentUsername,
+
+        text:text,
+
+        color:currentColor,
+
+        timestamp:Date.now()
+
+    };
+
+    if(currentChatType === "global"){
+
+        db.ref('globalMessages').push(msg);
+
+    }else{
+
+        db.ref(
+            'privateChats/' + currentChatId
+        ).push(msg);
 
     }
+
+    input.value = "";
+
+}
+
+
+// NAVIGATION
+function showPage(page){
+
+    document.getElementById(
+        'page-chat'
+    ).style.display =
+        page === 'chat'
+        ? 'block'
+        : 'none';
+
+    document.getElementById(
+        'page-profile'
+    ).style.display =
+        page === 'profile'
+        ? 'block'
+        : 'none';
+
+}
 
 </script>
 
