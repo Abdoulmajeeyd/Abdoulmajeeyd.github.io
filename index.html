@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HACKER_OS_CHAT</title>
-    <!-- Firebase Legacy Scripts -->
+    <title>HACKER_OS_V2</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -13,52 +12,53 @@
 <body>
 
 <div class="container">
-    <!-- 1. AUTH SECTION -->
+    <!-- AUTH SECTION -->
     <div id="auth-section">
-        <h1>SYSTEM_ACCESS</h1>
-        <input type="email" id="email" placeholder="USER_IDENTIFIER (Email)">
-        <input type="password" id="password" placeholder="ACCESS_KEY (Password)">
-        <button onclick="signUp()">INITIALIZE_NEW_USER</button>
-        <button onclick="login()" style="margin-top:10px; border-color: #555;">EXISTING_UPLINK</button>
+        <h1 style="font-size: 1.5rem;">SYSTEM_ACCESS_V2</h1>
+        <input type="email" id="email" placeholder="USER_ID">
+        <input type="password" id="password" placeholder="SECURE_KEY">
+        <button onclick="signUp()">REGISTER_NEW_NODE</button>
+        <button onclick="login()" style="margin-top:10px;">ESTABLISH_UPLINK</button>
     </div>
 
-    <!-- 2. MAIN INTERFACE -->
+    <!-- MAIN INTERFACE -->
     <div id="main-content" style="display:none;">
         <nav>
-            <a onclick="showPage('chat')">TERMINAL</a> | 
-            <a onclick="showPage('learning')">ARCHIVES</a> | 
-            <a onclick="showPage('profile')">PROFILE</a> | 
-            <a onclick="logout()">LOGOUT</a>
+            <button onclick="showPage('chat')" style="width:auto; padding: 5px;">TERMINAL</button>
+            <button onclick="showPage('friends')" style="width:auto; padding: 5px;">NODES</button>
+            <button onclick="showPage('learning')" style="width:auto; padding: 5px;">ARCHIVE</button>
+            <button onclick="logout()" style="width:auto; padding: 5px; color: red; border-color: red;">EXIT</button>
         </nav>
 
-        <!-- Chat Page -->
+        <!-- General Chat -->
         <div id="page-chat">
-            <h2>COMM_LINK_ESTABLISHED</h2>
-            <div id="chat-box"></div>
-            <input id="chat-input" placeholder="Type command...">
-            <button onclick="sendMsg()">TRANSMIT</button>
-        </div>
-
-        <!-- Learning Page -->
-        <div id="page-learning" style="display:none;">
-            <h2>KNOWLEDGE_DATABASE</h2>
-            <div id="learning-list">
-                <p>Connecting to secure archives...</p>
+            <h3>[GENERAL_COMM_LINK]</h3>
+            <div id="chat-box" class="display-area"></div>
+            <div style="display:flex;">
+                <input id="chat-input" placeholder="Enter transmission...">
+                <button onclick="sendMsg()" style="width:80px;">SEND</button>
             </div>
         </div>
 
-        <!-- Profile Page -->
-        <div id="page-profile" style="display:none;">
-            <h2>USER_METADATA</h2>
-            <p id="user-email-display"></p>
-            <input type="text" id="username-input" placeholder="Update Username">
-            <button onclick="updateUsername()">COMMIT_CHANGES</button>
+        <!-- Friends / Private Chat Section -->
+        <div id="page-friends" style="display:none;">
+            <h3>[ACTIVE_NODES]</h3>
+            <div id="friends-list" class="display-area">
+                <p>Scanning for active users...</p>
+            </div>
+        </div>
+
+        <!-- Learning Archive -->
+        <div id="page-learning" style="display:none;">
+            <h3>[DATA_ARCHIVES]</h3>
+            <div id="learning-list" class="display-area">
+                <p>Accessing secure database...</p>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // PASTE YOUR FIREBASE CONFIG HERE
     const firebaseConfig = {
         apiKey: "AIzaSyAy19hmMzZBH-VJ8W27sfWYD83hIMXothQ",
         authDomain: "my-chat-944a0.firebaseapp.com",
@@ -73,19 +73,23 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // --- NAVIGATION LOGIC ---
     function showPage(page) {
-        document.getElementById('page-chat').style.display = page === 'chat' ? 'block' : 'none';
-        document.getElementById('page-learning').style.display = page === 'learning' ? 'block' : 'none';
-        document.getElementById('page-profile').style.display = page === 'profile' ? 'block' : 'none';
+        const pages = ['page-chat', 'page-friends', 'page-learning'];
+        pages.forEach(p => document.getElementById(p).style.display = 'none');
+        document.getElementById('page-' + page).style.display = 'block';
+        
         if(page === 'learning') loadResources();
+        if(page === 'friends') loadUsers();
     }
 
-    // --- AUTH LOGIC ---
+    // --- AUTH ---
     function signUp() {
         const e = document.getElementById('email').value;
         const p = document.getElementById('password').value;
-        auth.createUserWithEmailAndPassword(e, p).catch(err => alert(err.message));
+        auth.createUserWithEmailAndPassword(e, p).then(cred => {
+            // Store user in database so others can see them in "Friends"
+            db.ref('users/' + cred.user.uid).set({ email: e, status: "online" });
+        }).catch(err => alert(err.message));
     }
 
     function login() {
@@ -100,17 +104,16 @@
         if (user) {
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
-            document.getElementById('user-email-display').innerText = "IDENTIFIED AS: " + user.email;
             loadMessages();
         }
     });
 
-    // --- CHAT LOGIC ---
+    // --- CHAT ---
     function sendMsg() {
         const txt = document.getElementById('chat-input').value;
         if(txt) {
             db.ref('messages').push({
-                user: auth.currentUser.email,
+                user: auth.currentUser.email.split('@')[0],
                 text: txt,
                 time: Date.now()
             });
@@ -119,38 +122,51 @@
     }
 
     function loadMessages() {
-        db.ref('messages').limitToLast(20).on('value', snap => {
+        db.ref('messages').limitToLast(15).on('value', snap => {
             const box = document.getElementById('chat-box');
             box.innerHTML = "";
             snap.forEach(child => {
                 const m = child.val();
-                box.innerHTML += `<p><strong>${m.user.split('@')[0]}:</strong> ${m.text}</p>`;
+                box.innerHTML += `<p><span style="color:#888;">[${new Date(m.time).toLocaleTimeString()}]</span> <strong>${m.user}:</strong> ${m.text}</p>`;
             });
             box.scrollTop = box.scrollHeight;
         });
     }
 
-    // --- LEARNING LOGIC ---
+    // --- FRIENDS LIST ---
+    function loadUsers() {
+        const list = document.getElementById('friends-list');
+        db.ref('users').on('value', snap => {
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const u = child.val();
+                if(u.email !== auth.currentUser.email) {
+                    list.innerHTML += `
+                        <div class="user-node">
+                            <span>● ${u.email}</span>
+                            <button onclick="startPrivateChat('${child.key}')" style="width:auto; font-size:10px;">MESSAGE</button>
+                        </div>`;
+                }
+            });
+        });
+    }
+
+    // --- ARCHIVES ---
     function loadResources() {
         const list = document.getElementById('learning-list');
         db.ref('learningResources').on('value', snap => {
             list.innerHTML = "";
-            if(!snap.exists()) {
-                list.innerHTML = "<p>NO DATA FOUND IN ARCHIVES.</p>";
-                return;
-            }
             snap.forEach(child => {
                 const item = child.val();
                 list.innerHTML += `
-                    <div style="border: 1px solid #00ff41; margin-bottom: 10px; padding: 10px; background: rgba(0,255,65,0.1);">
+                    <div class="resource-card">
                         <strong>> ${item.title}</strong><br>
-                        <small>${item.info}</small><br>
-                        <a href="${item.link}" target="_blank" style="color: #000; background: #00ff41; padding: 2px 5px; text-decoration: none; display: inline-block; margin-top: 5px;">ACCESS_DATA</a>
-                    </div>
-                `;
+                        <a href="${item.link}" target="_blank">DECRYPT_DATA</a>
+                    </div>`;
             });
         });
     }
 </script>
 </body>
 </html>
+
