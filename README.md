@@ -1,1 +1,43 @@
 # Abdulmajid.github.io
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Website</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Welcome</h1>
+    <p>This is my GitHub Pages website</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>About Me</h2>
+      <p>I am building my first website using GitHub Pages.</p>
+    </section>
+
+    <section class="card">
+      <h2>Projects</h2>
+      <ul>
+        <li>Project 1</li>
+        <li>Project 2</li>
+        <li>Project 3</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Contact</h2>
+      <p>Email: example@email.com</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 My Website</p>
+  </footer>
+
+</body>
+</html>
