@@ -41,12 +41,12 @@ body{
 }
 
 .panel{
-    background:rgba(0,0,0,0.88);
+    background:rgba(0,0,0,0.9);
     border:1px solid #00ff66;
     padding:15px;
     margin-bottom:15px;
-    box-shadow:0 0 15px #00ff66;
     border-radius:10px;
+    box-shadow:0 0 15px #00ff66;
 }
 
 input,button{
@@ -56,8 +56,9 @@ input,button{
     background:black;
     color:#00ff66;
     border:1px solid #00ff66;
-    font-family:Courier New;
     border-radius:8px;
+    font-family:Courier New, monospace;
+    direction:ltr;
 }
 
 button{
@@ -93,16 +94,19 @@ nav a{
     overflow-y:auto;
     border:1px solid #00ff66;
     padding:10px;
-    background:black;
     border-radius:10px;
+    background:black;
 }
 
 .message{
-    padding:10px;
-    margin-bottom:10px;
     background:#101010;
     border-left:4px solid #00ff66;
     border-radius:8px;
+    padding:10px;
+    margin-bottom:10px;
+    direction:ltr;
+    unicode-bidi:plaintext;
+    word-wrap:break-word;
 }
 
 .chat-input{
@@ -120,23 +124,23 @@ nav a{
     margin-bottom:10px;
 }
 
-img.chat-image{
+.chat-image{
     max-width:220px;
     border-radius:10px;
     margin-top:10px;
 }
 
-#typing-status{
-    margin-top:10px;
-    color:#999;
-}
-
 .profile-pic{
-    width:60px;
-    height:60px;
+    width:70px;
+    height:70px;
     border-radius:50%;
     object-fit:cover;
     border:2px solid #00ff66;
+}
+
+#typing-status{
+    margin-top:10px;
+    color:#999;
 }
 
 @media(max-width:900px){
@@ -153,7 +157,7 @@ img.chat-image{
 
 </style>
 </head>
-<body>
+<body dir="ltr">
 
 <canvas id="matrix"></canvas>
 
@@ -219,7 +223,7 @@ GLOBAL CHAT
 
 </div>
 
-<input type="file" id="image-input">
+<input type="file" id="image-input" accept="image/*">
 
 <button onclick="sendImage()">
 SEND IMAGE
@@ -233,7 +237,7 @@ SEND IMAGE
 
 <div id="page-profile" style="display:none;" class="panel">
 
-<h2>PROFILE</h2>
+<h2>PROFILE SETTINGS</h2>
 
 <p id="user-email-display"></p>
 
@@ -245,7 +249,7 @@ SEND IMAGE
 
 <input type="color" id="color-input" value="#00ff66">
 
-<input type="file" id="profile-pic-input">
+<input type="file" id="profile-pic-input" accept="image/*">
 
 <button onclick="updateProfile()">
 SAVE PROFILE
@@ -287,7 +291,7 @@ const auth = firebase.auth();
 const db = firebase.database();
 const storage = firebase.storage();
 
-let currentUsername = 'Guest';
+let currentUsername = '';
 let currentColor = '#00ff66';
 let currentPhoto = '';
 let currentChatType = 'global';
@@ -385,66 +389,87 @@ auth.onAuthStateChanged(user=>{
 
 async function updateProfile(){
 
-    const username = document.getElementById('username-input').value;
+    try{
 
-    const color = document.getElementById('color-input').value;
+        const username = document.getElementById('username-input').value.trim();
 
-    const file = document.getElementById('profile-pic-input').files[0];
+        const color = document.getElementById('color-input').value;
 
-    let photo = currentPhoto;
+        const file = document.getElementById('profile-pic-input').files[0];
 
-    if(file){
+        let photo = currentPhoto || '';
 
-        const ref = storage.ref(
-            'profilePics/' + auth.currentUser.uid
-        );
+        if(file){
 
-        await ref.put(file);
+            const ref = storage.ref(
+                'profilePics/' + auth.currentUser.uid
+            );
 
-        photo = await ref.getDownloadURL();
+            await ref.put(file);
+
+            photo = await ref.getDownloadURL();
+
+        }
+
+        await db.ref(
+            'profiles/' + auth.currentUser.uid
+        ).set({
+
+            username: username || auth.currentUser.email.split('@')[0],
+
+            color:color,
+
+            photo:photo
+
+        });
+
+        currentUsername = username || auth.currentUser.email.split('@')[0];
+
+        currentColor = color;
+
+        currentPhoto = photo;
+
+        document.getElementById('profile-preview').src = photo;
+
+        alert('PROFILE UPDATED');
+
+        loadUsers();
+
+    }catch(err){
+
+        alert(err.message);
 
     }
-
-    db.ref(
-        'profiles/' + auth.currentUser.uid
-    ).set({
-
-        username:username,
-
-        color:color,
-
-        photo:photo
-
-    });
-
-    currentUsername = username;
-    currentColor = color;
-    currentPhoto = photo;
-
-    document.getElementById('profile-preview').src = photo;
-
-    alert('PROFILE UPDATED');
 
 }
 
 function loadProfile(uid){
 
     db.ref('profiles/' + uid)
-    .on('value',snap=>{
+    .once('value')
+    .then(snap=>{
 
-        if(snap.val()){
+        if(snap.exists()){
 
-            currentUsername = snap.val().username || auth.currentUser.email;
+            const data = snap.val();
 
-            currentColor = snap.val().color || '#00ff66';
+            currentUsername = data.username || auth.currentUser.email.split('@')[0];
 
-            currentPhoto = snap.val().photo || '';
+            currentColor = data.color || '#00ff66';
+
+            currentPhoto = data.photo || '';
 
             document.getElementById('username-input').value = currentUsername;
 
             document.getElementById('color-input').value = currentColor;
 
-            document.getElementById('profile-preview').src = currentPhoto;
+            if(currentPhoto){
+                document.getElementById('profile-preview').src = currentPhoto;
+            }
+
+        }else{
+
+            currentUsername = auth.currentUser.email.split('@')[0];
 
         }
 
@@ -481,13 +506,26 @@ function loadUsers(){
                 statusDot.style.marginRight='10px';
 
                 const text = document.createElement('span');
-                text.textContent = user.email;
+
+                db.ref('profiles/' + uid)
+                .on('value', profileSnap => {
+
+                    if(profileSnap.val() && profileSnap.val().username){
+
+                        text.textContent = profileSnap.val().username;
+
+                    }else{
+
+                        text.textContent = user.email.split('@')[0];
+
+                    }
+
+                });
 
                 btn.appendChild(statusDot);
                 btn.appendChild(text);
 
-                btn.onclick = ()=>
-                openPrivateChat(uid,user.email);
+                btn.onclick = ()=> openPrivateChat(uid,text.textContent);
 
                 db.ref('status/' + uid)
                 .on('value',s=>{
@@ -536,19 +574,16 @@ function openGlobalChat(){
 
 }
 
-function openPrivateChat(uid,email){
+function openPrivateChat(uid,username){
 
     currentChatType='private';
 
     selectedUser = uid;
 
-    currentChatId = generateChatId(
-        auth.currentUser.uid,
-        uid
-    );
+    currentChatId = generateChatId(auth.currentUser.uid,uid);
 
     document.getElementById('chat-title').innerText =
-    'PRIVATE CHAT: ' + email;
+    'PRIVATE CHAT: ' + username;
 
     document.getElementById('chat-box').innerHTML='';
 
@@ -569,8 +604,7 @@ function openPrivateChat(uid,email){
 
         if(snap.val() && snap.val().user !== currentUsername){
 
-            status.textContent =
-            snap.val().user + ' is typing...';
+            status.textContent = snap.val().user + ' is typing...';
 
         }else{
 
@@ -590,8 +624,7 @@ function renderMessage(m){
 
     div.style.borderLeftColor = m.color || '#00ff66';
 
-    const time = new Date(m.timestamp)
-    .toLocaleTimeString();
+    const time = new Date(m.timestamp).toLocaleTimeString();
 
     div.innerHTML =
 
@@ -623,18 +656,11 @@ function renderMessage(m){
 
             if(currentChatType === 'global'){
 
-                db.ref(
-                    'globalMessages/' + m.messageId
-                ).remove();
+                db.ref('globalMessages/' + m.messageId).remove();
 
             }else{
 
-                db.ref(
-                    'privateChats/' +
-                    currentChatId +
-                    '/' +
-                    m.messageId
-                ).remove();
+                db.ref('privateChats/' + currentChatId + '/' + m.messageId).remove();
 
             }
 
@@ -644,8 +670,7 @@ function renderMessage(m){
 
     }
 
-    document.getElementById('chat-box')
-    .appendChild(div);
+    document.getElementById('chat-box').appendChild(div);
 
     document.getElementById('msg-sound').play();
 
@@ -695,35 +720,51 @@ async function sendImage(){
 
     const file = document.getElementById('image-input').files[0];
 
-    if(!file) return;
+    if(!file){
 
-    const storageRef = storage.ref(
-        'chatImages/' + Date.now()
-    );
+        alert('Choose image');
 
-    await storageRef.put(file);
+        return;
 
-    const url = await storageRef.getDownloadURL();
+    }
 
-    const ref = currentChatType === 'global'
-    ? db.ref('globalMessages').push()
-    : db.ref('privateChats/' + currentChatId).push();
+    try{
 
-    ref.set({
+        const storageRef = storage.ref(
+            'chatImages/' + Date.now() + '_' + file.name
+        );
 
-        messageId:ref.key,
+        await storageRef.put(file);
 
-        sender:auth.currentUser.uid,
+        const url = await storageRef.getDownloadURL();
 
-        name:currentUsername,
+        const ref = currentChatType === 'global'
+        ? db.ref('globalMessages').push()
+        : db.ref('privateChats/' + currentChatId).push();
 
-        image:url,
+        ref.set({
 
-        color:currentColor,
+            messageId:ref.key,
 
-        timestamp:Date.now()
+            sender:auth.currentUser.uid,
 
-    });
+            name:currentUsername,
+
+            image:url,
+
+            color:currentColor,
+
+            timestamp:Date.now()
+
+        });
+
+        alert('Image sent');
+
+    }catch(err){
+
+        alert(err.message);
+
+    }
 
 }
 
@@ -744,8 +785,7 @@ document.getElementById('chat-input')
 
         setTimeout(()=>{
 
-            db.ref('typing/' + currentChatId)
-            .remove();
+            db.ref('typing/' + currentChatId).remove();
 
         },1500);
 
@@ -778,20 +818,11 @@ function draw(){
 
     for(let i=0;i<drops.length;i++){
 
-        const text = chars[
-            Math.floor(Math.random()*chars.length)
-        ];
+        const text = chars[Math.floor(Math.random()*chars.length)];
 
-        ctx.fillText(
-            text,
-            i*fontSize,
-            drops[i]*fontSize
-        );
+        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
 
-        if(
-            drops[i]*fontSize > canvas.height &&
-            Math.random() > 0.975
-        ){
+        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975){
             drops[i]=0;
         }
 
@@ -806,4 +837,4 @@ setInterval(draw,33);
 </script>
 
 </body>
-</html>
+    </html>
