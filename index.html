@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ANONYCHAT TERMINAL</title>
+<title>ANONYCHAT FREE</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
 <style>
 
@@ -43,9 +42,9 @@ body{
 .panel{
     background:rgba(0,0,0,0.9);
     border:1px solid #00ff66;
+    border-radius:12px;
     padding:15px;
     margin-bottom:15px;
-    border-radius:10px;
     box-shadow:0 0 15px #00ff66;
 }
 
@@ -58,7 +57,6 @@ input,button{
     border:1px solid #00ff66;
     border-radius:8px;
     font-family:Courier New, monospace;
-    direction:ltr;
 }
 
 button{
@@ -68,11 +66,6 @@ button{
 button:hover{
     background:#00ff66;
     color:black;
-}
-
-nav a{
-    margin-right:20px;
-    cursor:pointer;
 }
 
 .layout{
@@ -93,15 +86,15 @@ nav a{
     height:500px;
     overflow-y:auto;
     border:1px solid #00ff66;
-    padding:10px;
     border-radius:10px;
+    padding:10px;
     background:black;
 }
 
 .message{
     background:#101010;
     border-left:4px solid #00ff66;
-    border-radius:8px;
+    border-radius:10px;
     padding:10px;
     margin-bottom:10px;
     direction:ltr;
@@ -124,23 +117,9 @@ nav a{
     margin-bottom:10px;
 }
 
-.chat-image{
-    max-width:220px;
-    border-radius:10px;
-    margin-top:10px;
-}
-
-.profile-pic{
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    object-fit:cover;
-    border:2px solid #00ff66;
-}
-
 #typing-status{
     margin-top:10px;
-    color:#999;
+    color:#888;
 }
 
 @media(max-width:900px){
@@ -179,13 +158,13 @@ nav a{
 
 <div id="main-content" style="display:none;">
 
-<nav class="panel">
+<div class="panel">
 
-<a onclick="showPage('chat')">CHAT</a>
-<a onclick="showPage('profile')">PROFILE</a>
-<a onclick="logout()">LOGOUT</a>
+<button onclick="showPage('chat')">CHAT</button>
+<button onclick="showPage('profile')">PROFILE</button>
+<button onclick="logout()">LOGOUT</button>
 
-</nav>
+</div>
 
 <div id="page-chat">
 
@@ -223,12 +202,6 @@ GLOBAL CHAT
 
 </div>
 
-<input type="file" id="image-input" accept="image/*">
-
-<button onclick="sendImage()">
-SEND IMAGE
-</button>
-
 </div>
 
 </div>
@@ -241,15 +214,11 @@ SEND IMAGE
 
 <p id="user-email-display"></p>
 
-<img id="profile-preview" class="profile-pic">
-
 <input type="text" id="username-input" placeholder="USERNAME">
 
 <label>CHAT COLOR</label>
 
 <input type="color" id="color-input" value="#00ff66">
-
-<input type="file" id="profile-pic-input" accept="image/*">
 
 <button onclick="updateProfile()">
 SAVE PROFILE
@@ -261,26 +230,16 @@ SAVE PROFILE
 
 </div>
 
-<audio id="msg-sound">
-<source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3">
-</audio>
-
 <script>
 
 const firebaseConfig = {
 
     apiKey: "AIzaSyAy19nnMz2BH-vJ0w27sfMYD6IhlWUothQ",
-
     authDomain: "my-chat-944a0.firebaseapp.com",
-
     projectId: "my-chat-944a0",
-
     storageBucket: "my-chat-944a0.appspot.com",
-
     messagingSenderId: "176386861788",
-
     appId: "1:176386861788:web:b2cf1263b4774138c4a219",
-
     databaseURL: "https://my-chat-944a0-default-rtdb.firebaseio.com"
 
 };
@@ -289,19 +248,16 @@ firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.database();
-const storage = firebase.storage();
 
-let currentUsername = '';
-let currentColor = '#00ff66';
-let currentPhoto = '';
-let currentChatType = 'global';
-let selectedUser = null;
-let currentChatId = null;
+let currentUsername='';
+let currentColor='#00ff66';
+let currentChatType='global';
+let currentChatId=null;
 
 function signUp(){
 
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    const email=document.getElementById('email').value;
+    const password=document.getElementById('password').value;
 
     auth.createUserWithEmailAndPassword(email,password)
     .catch(err=>alert(err.message));
@@ -310,8 +266,8 @@ function signUp(){
 
 function login(){
 
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    const email=document.getElementById('email').value;
+    const password=document.getElementById('password').value;
 
     auth.signInWithEmailAndPassword(email,password)
     .catch(err=>alert(err.message));
@@ -327,34 +283,28 @@ function logout(){
 
 function showPage(page){
 
-    document.getElementById('page-chat').style.display =
-    page === 'chat' ? 'block':'none';
+    document.getElementById('page-chat').style.display=
+    page==='chat'?'block':'none';
 
-    document.getElementById('page-profile').style.display =
-    page === 'profile' ? 'block':'none';
+    document.getElementById('page-profile').style.display=
+    page==='profile'?'block':'none';
 
 }
 
 function setOnlineStatus(){
 
-    const statusRef = db.ref(
-        'status/' + auth.currentUser.uid
+    const statusRef=db.ref(
+        'status/'+auth.currentUser.uid
     );
 
     statusRef.set({
-
         online:true,
-
         lastSeen:Date.now()
-
     });
 
     statusRef.onDisconnect().set({
-
         online:false,
-
         lastSeen:Date.now()
-
     });
 
 }
@@ -368,10 +318,10 @@ auth.onAuthStateChanged(user=>{
 
         document.getElementById('main-content').style.display='block';
 
-        document.getElementById('user-email-display').innerText =
-        'LOGGED IN: ' + user.email;
+        document.getElementById('user-email-display').innerText=
+        'LOGGED IN: '+user.email;
 
-        db.ref('users/' + user.uid).set({
+        db.ref('users/'+user.uid).set({
             email:user.email
         });
 
@@ -391,45 +341,22 @@ async function updateProfile(){
 
     try{
 
-        const username = document.getElementById('username-input').value.trim();
+        const username=document.getElementById('username-input').value.trim();
 
-        const color = document.getElementById('color-input').value;
-
-        const file = document.getElementById('profile-pic-input').files[0];
-
-        let photo = currentPhoto || '';
-
-        if(file){
-
-            const ref = storage.ref(
-                'profilePics/' + auth.currentUser.uid
-            );
-
-            await ref.put(file);
-
-            photo = await ref.getDownloadURL();
-
-        }
+        const color=document.getElementById('color-input').value;
 
         await db.ref(
-            'profiles/' + auth.currentUser.uid
+            'profiles/'+auth.currentUser.uid
         ).set({
 
-            username: username || auth.currentUser.email.split('@')[0],
-
-            color:color,
-
-            photo:photo
+            username:username || auth.currentUser.email.split('@')[0],
+            color:color
 
         });
 
-        currentUsername = username || auth.currentUser.email.split('@')[0];
+        currentUsername=username || auth.currentUser.email.split('@')[0];
 
-        currentColor = color;
-
-        currentPhoto = photo;
-
-        document.getElementById('profile-preview').src = photo;
+        currentColor=color;
 
         alert('PROFILE UPDATED');
 
@@ -445,31 +372,25 @@ async function updateProfile(){
 
 function loadProfile(uid){
 
-    db.ref('profiles/' + uid)
+    db.ref('profiles/'+uid)
     .once('value')
     .then(snap=>{
 
         if(snap.exists()){
 
-            const data = snap.val();
+            const data=snap.val();
 
-            currentUsername = data.username || auth.currentUser.email.split('@')[0];
+            currentUsername=data.username || auth.currentUser.email.split('@')[0];
 
-            currentColor = data.color || '#00ff66';
+            currentColor=data.color || '#00ff66';
 
-            currentPhoto = data.photo || '';
+            document.getElementById('username-input').value=currentUsername;
 
-            document.getElementById('username-input').value = currentUsername;
-
-            document.getElementById('color-input').value = currentColor;
-
-            if(currentPhoto){
-                document.getElementById('profile-preview').src = currentPhoto;
-            }
+            document.getElementById('color-input').value=currentColor;
 
         }else{
 
-            currentUsername = auth.currentUser.email.split('@')[0];
+            currentUsername=auth.currentUser.email.split('@')[0];
 
         }
 
@@ -482,22 +403,22 @@ function loadUsers(){
     db.ref('users')
     .on('value',snap=>{
 
-        const usersDiv = document.getElementById('users-list');
+        const usersDiv=document.getElementById('users-list');
 
         usersDiv.innerHTML='';
 
         snap.forEach(child=>{
 
-            const user = child.val();
-            const uid = child.key;
+            const user=child.val();
+            const uid=child.key;
 
-            if(uid !== auth.currentUser.uid){
+            if(uid!==auth.currentUser.uid){
 
-                const btn = document.createElement('button');
+                const btn=document.createElement('button');
 
                 btn.className='user-btn';
 
-                const statusDot = document.createElement('span');
+                const statusDot=document.createElement('span');
 
                 statusDot.style.display='inline-block';
                 statusDot.style.width='10px';
@@ -505,18 +426,18 @@ function loadUsers(){
                 statusDot.style.borderRadius='50%';
                 statusDot.style.marginRight='10px';
 
-                const text = document.createElement('span');
+                const text=document.createElement('span');
 
-                db.ref('profiles/' + uid)
-                .on('value', profileSnap => {
+                db.ref('profiles/'+uid)
+                .on('value',profileSnap=>{
 
                     if(profileSnap.val() && profileSnap.val().username){
 
-                        text.textContent = profileSnap.val().username;
+                        text.textContent=profileSnap.val().username;
 
                     }else{
 
-                        text.textContent = user.email.split('@')[0];
+                        text.textContent=user.email.split('@')[0];
 
                     }
 
@@ -525,9 +446,10 @@ function loadUsers(){
                 btn.appendChild(statusDot);
                 btn.appendChild(text);
 
-                btn.onclick = ()=> openPrivateChat(uid,text.textContent);
+                btn.onclick=()=>
+                openPrivateChat(uid,text.textContent);
 
-                db.ref('status/' + uid)
+                db.ref('status/'+uid)
                 .on('value',s=>{
 
                     if(s.val() && s.val().online){
@@ -578,18 +500,16 @@ function openPrivateChat(uid,username){
 
     currentChatType='private';
 
-    selectedUser = uid;
+    currentChatId=generateChatId(auth.currentUser.uid,uid);
 
-    currentChatId = generateChatId(auth.currentUser.uid,uid);
-
-    document.getElementById('chat-title').innerText =
-    'PRIVATE CHAT: ' + username;
+    document.getElementById('chat-title').innerText=
+    'PRIVATE CHAT: '+username;
 
     document.getElementById('chat-box').innerHTML='';
 
-    db.ref('privateChats/' + currentChatId).off();
+    db.ref('privateChats/'+currentChatId).off();
 
-    db.ref('privateChats/' + currentChatId)
+    db.ref('privateChats/'+currentChatId)
     .limitToLast(100)
     .on('child_added',snap=>{
 
@@ -597,70 +517,45 @@ function openPrivateChat(uid,username){
 
     });
 
-    db.ref('typing/' + currentChatId)
-    .on('value',snap=>{
-
-        const status = document.getElementById('typing-status');
-
-        if(snap.val() && snap.val().user !== currentUsername){
-
-            status.textContent = snap.val().user + ' is typing...';
-
-        }else{
-
-            status.textContent='';
-
-        }
-
-    });
-
 }
 
 function renderMessage(m){
 
-    const div = document.createElement('div');
+    const div=document.createElement('div');
 
     div.className='message';
 
-    div.style.borderLeftColor = m.color || '#00ff66';
+    div.style.borderLeftColor=m.color || '#00ff66';
 
-    const time = new Date(m.timestamp).toLocaleTimeString();
+    const time=new Date(m.timestamp)
+    .toLocaleTimeString();
 
-    div.innerHTML =
+    div.innerHTML=
 
-    "<strong style='color:" +
-    (m.color || '#00ff66') +
-    "'>" +
-    m.name +
-    "</strong> <small>" +
-    time +
-    "</small><br>" +
+    "<strong style='color:"+
+    (m.color || '#00ff66')+
+    "'>"+
+    m.name+
+    "</strong> <small>"+
+    time+
+    "</small><br>"+
     (m.text || '');
 
-    if(m.image){
+    if(m.sender===auth.currentUser.uid){
 
-        div.innerHTML +=
-        "<br><img class='chat-image' src='" +
-        m.image +
-        "'>";
-
-    }
-
-    if(m.sender === auth.currentUser.uid){
-
-        const del = document.createElement('button');
+        const del=document.createElement('button');
 
         del.textContent='DELETE';
 
-        del.onclick = ()=>{
+        del.onclick=()=>{
 
-            if(currentChatType === 'global'){
+            if(currentChatType==='global'){
 
-                db.ref('globalMessages/' + m.messageId).remove();
+                db.ref('globalMessages/'+m.messageId).remove();
 
             }else{
 
-                db.ref('privateChats/' + currentChatId + '/' + m.messageId).remove();
+                db.ref('privateChats/'+currentChatId+'/'+m.messageId).remove();
 
             }
 
@@ -672,136 +567,48 @@ function renderMessage(m){
 
     document.getElementById('chat-box').appendChild(div);
 
-    document.getElementById('msg-sound').play();
+    const box=document.getElementById('chat-box');
 
-    const box = document.getElementById('chat-box');
-
-    box.scrollTop = box.scrollHeight;
+    box.scrollTop=box.scrollHeight;
 
 }
 
 function sendMsg(){
 
-    const input = document.getElementById('chat-input');
+    const input=document.getElementById('chat-input');
 
-    const text = input.value;
+    const text=input.value;
 
     if(text.trim()==='') return;
 
-    const ref = currentChatType === 'global'
+    const ref=currentChatType==='global'
     ? db.ref('globalMessages').push()
-    : db.ref('privateChats/' + currentChatId).push();
+    : db.ref('privateChats/'+currentChatId).push();
 
-    const msg = {
+    ref.set({
 
         messageId:ref.key,
-
         sender:auth.currentUser.uid,
-
         name:currentUsername,
-
         text:text,
-
         color:currentColor,
-
-        photo:currentPhoto,
-
         timestamp:Date.now()
 
-    };
-
-    ref.set(msg);
+    });
 
     input.value='';
 
 }
 
-async function sendImage(){
+const canvas=document.getElementById('matrix');
+const ctx=canvas.getContext('2d');
 
-    const file = document.getElementById('image-input').files[0];
-
-    if(!file){
-
-        alert('Choose image');
-
-        return;
-
-    }
-
-    try{
-
-        const storageRef = storage.ref(
-            'chatImages/' + Date.now() + '_' + file.name
-        );
-
-        await storageRef.put(file);
-
-        const url = await storageRef.getDownloadURL();
-
-        const ref = currentChatType === 'global'
-        ? db.ref('globalMessages').push()
-        : db.ref('privateChats/' + currentChatId).push();
-
-        ref.set({
-
-            messageId:ref.key,
-
-            sender:auth.currentUser.uid,
-
-            name:currentUsername,
-
-            image:url,
-
-            color:currentColor,
-
-            timestamp:Date.now()
-
-        });
-
-        alert('Image sent');
-
-    }catch(err){
-
-        alert(err.message);
-
-    }
-
-}
-
-
-document.getElementById('chat-input')
-.addEventListener('input',()=>{
-
-    if(currentChatType === 'private'){
-
-        db.ref('typing/' + currentChatId)
-        .set({
-
-            user:currentUsername,
-
-            typing:true
-
-        });
-
-        setTimeout(()=>{
-
-            db.ref('typing/' + currentChatId).remove();
-
-        },1500);
-
-    }
-
-});
-
-const canvas = document.getElementById('matrix');
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 
 const chars='01';
 const fontSize=14;
-const columns = canvas.width/fontSize;
+const columns=canvas.width/fontSize;
 const drops=[];
 
 for(let i=0;i<columns;i++){
@@ -818,11 +625,11 @@ function draw(){
 
     for(let i=0;i<drops.length;i++){
 
-        const text = chars[Math.floor(Math.random()*chars.length)];
+        const text=chars[Math.floor(Math.random()*chars.length)];
 
         ctx.fillText(text,i*fontSize,drops[i]*fontSize);
 
-        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975){
+        if(drops[i]*fontSize>canvas.height && Math.random()>0.975){
             drops[i]=0;
         }
 
@@ -837,4 +644,4 @@ setInterval(draw,33);
 </script>
 
 </body>
-    </html>
+</html>
