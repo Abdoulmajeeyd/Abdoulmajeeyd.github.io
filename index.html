@@ -3,61 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANONYCHAT TERMINAL</title>
 
-<title>ANONYCHAT</title>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
 <style>
+
+*{
+    box-sizing:border-box;
+}
 
 body{
     margin:0;
     background:black;
     color:#00ff66;
     font-family:Courier New, monospace;
+    overflow-x:hidden;
+}
+
+#matrix{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
 }
 
 .container{
     width:95%;
-    max-width:1200px;
+    max-width:1300px;
     margin:auto;
     padding-top:20px;
 }
 
 .panel{
+    background:rgba(0,0,0,0.88);
     border:1px solid #00ff66;
     padding:15px;
     margin-bottom:15px;
-    background:#050505;
-    box-shadow:0 0 10px #00ff66;
+    box-shadow:0 0 15px #00ff66;
+    border-radius:10px;
 }
 
-h1,h2,h3{
-    color:#00ff66;
-}
-
-input, select{
+input,button{
     width:100%;
     padding:12px;
     margin-top:10px;
     background:black;
     color:#00ff66;
     border:1px solid #00ff66;
-    box-sizing:border-box;
     font-family:Courier New;
+    border-radius:8px;
 }
 
 button{
-    background:black;
-    color:#00ff66;
-    border:1px solid #00ff66;
-    padding:10px;
     cursor:pointer;
-    margin-top:10px;
-    font-family:Courier New;
 }
 
 button:hover{
@@ -65,14 +69,9 @@ button:hover{
     color:black;
 }
 
-nav{
-    margin-bottom:15px;
-}
-
 nav a{
-    margin-right:15px;
+    margin-right:20px;
     cursor:pointer;
-    color:#00ff66;
 }
 
 .layout{
@@ -82,7 +81,7 @@ nav a{
 }
 
 .users-panel{
-    width:250px;
+    width:300px;
 }
 
 .chat-panel{
@@ -90,29 +89,26 @@ nav a{
 }
 
 .chat-box{
-    height:400px;
+    height:500px;
     overflow-y:auto;
     border:1px solid #00ff66;
     padding:10px;
     background:black;
-    margin-bottom:10px;
+    border-radius:10px;
 }
 
 .message{
+    padding:10px;
     margin-bottom:10px;
-    padding:8px;
-    border-left:3px solid #00ff66;
-    background:#0d0d0d;
-    word-wrap:break-word;
-}
-
-.system{
-    color:#888;
+    background:#101010;
+    border-left:4px solid #00ff66;
+    border-radius:8px;
 }
 
 .chat-input{
     display:flex;
     gap:10px;
+    margin-top:10px;
 }
 
 .chat-input input{
@@ -121,17 +117,29 @@ nav a{
 }
 
 .user-btn{
-    width:100%;
-    text-align:left;
     margin-bottom:10px;
 }
 
-.private-active{
-    background:#00ff66;
-    color:black;
+img.chat-image{
+    max-width:220px;
+    border-radius:10px;
+    margin-top:10px;
 }
 
-@media(max-width:800px){
+#typing-status{
+    margin-top:10px;
+    color:#999;
+}
+
+.profile-pic{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #00ff66;
+}
+
+@media(max-width:900px){
 
     .layout{
         flex-direction:column;
@@ -144,119 +152,114 @@ nav a{
 }
 
 </style>
-
 </head>
 <body>
 
+<canvas id="matrix"></canvas>
+
 <div class="container">
 
-    <!-- LOGIN -->
-    <div id="auth-section" class="panel">
+<div id="auth-section" class="panel">
 
-        <h1>ANONYCHAT TERMINAL</h1>
+<h1>ANONYCHAT TERMINAL</h1>
 
-        <input type="email" id="email" placeholder="EMAIL">
+<input type="email" id="email" placeholder="EMAIL">
 
-        <input type="password" id="password" placeholder="PASSWORD">
+<input type="password" id="password" placeholder="PASSWORD">
 
-        <button onclick="signUp()">REGISTER</button>
+<button onclick="signUp()">SIGN UP</button>
 
-        <button onclick="login()">LOGIN</button>
-
-    </div>
-
-    <!-- MAIN -->
-    <div id="main-content" style="display:none;">
-
-        <nav class="panel">
-
-            <a onclick="showPage('chat')">CHAT</a>
-
-            <a onclick="showPage('profile')">PROFILE</a>
-
-            <a onclick="logout()">LOGOUT</a>
-
-        </nav>
-
-        <!-- CHAT PAGE -->
-        <div id="page-chat">
-
-            <div class="layout">
-
-                <!-- USERS -->
-                <div class="users-panel panel">
-
-                    <h3>PRIVATE USERS</h3>
-
-                    <button onclick="openGlobalChat()">
-                        GLOBAL CHAT
-                    </button>
-
-                    <hr style="border-color:#00ff66;">
-
-                    <div id="users-list"></div>
-
-                </div>
-
-                <!-- CHAT -->
-                <div class="chat-panel panel">
-
-                    <h3 id="chat-title">
-                        GLOBAL CHAT
-                    </h3>
-
-                    <div id="chat-box" class="chat-box"></div>
-
-                    <div class="chat-input">
-
-                        <input
-                            type="text"
-                            id="chat-input"
-                            placeholder="ENTER MESSAGE..."
-                        >
-
-                        <button onclick="sendMsg()">
-                            SEND
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- PROFILE -->
-        <div id="page-profile" style="display:none;" class="panel">
-
-            <h2>PROFILE SETTINGS</h2>
-
-            <p id="user-email-display"></p>
-
-            <input
-                type="text"
-                id="username-input"
-                placeholder="USERNAME"
-            >
-
-            <label>CHAT COLOR</label>
-
-            <input
-                type="color"
-                id="color-input"
-                value="#00ff66"
-            >
-
-            <button onclick="updateProfile()">
-                SAVE PROFILE
-            </button>
-
-        </div>
-
-    </div>
+<button onclick="login()">LOGIN</button>
 
 </div>
+
+<div id="main-content" style="display:none;">
+
+<nav class="panel">
+
+<a onclick="showPage('chat')">CHAT</a>
+<a onclick="showPage('profile')">PROFILE</a>
+<a onclick="logout()">LOGOUT</a>
+
+</nav>
+
+<div id="page-chat">
+
+<div class="layout">
+
+<div class="users-panel panel">
+
+<h3>CHANNELS</h3>
+
+<button onclick="openGlobalChat()">
+GLOBAL CHAT
+</button>
+
+<hr style="border-color:#00ff66;">
+
+<h3>PRIVATE USERS</h3>
+
+<div id="users-list"></div>
+
+</div>
+
+<div class="chat-panel panel">
+
+<h2 id="chat-title">GLOBAL CHAT</h2>
+
+<div id="chat-box" class="chat-box"></div>
+
+<div id="typing-status"></div>
+
+<div class="chat-input">
+
+<input type="text" id="chat-input" placeholder="TYPE MESSAGE...">
+
+<button onclick="sendMsg()">SEND</button>
+
+</div>
+
+<input type="file" id="image-input">
+
+<button onclick="sendImage()">
+SEND IMAGE
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="page-profile" style="display:none;" class="panel">
+
+<h2>PROFILE</h2>
+
+<p id="user-email-display"></p>
+
+<img id="profile-preview" class="profile-pic">
+
+<input type="text" id="username-input" placeholder="USERNAME">
+
+<label>CHAT COLOR</label>
+
+<input type="color" id="color-input" value="#00ff66">
+
+<input type="file" id="profile-pic-input">
+
+<button onclick="updateProfile()">
+SAVE PROFILE
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<audio id="msg-sound">
+<source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3">
+</audio>
 
 <script>
 
@@ -281,84 +284,91 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
-
 const db = firebase.database();
+const storage = firebase.storage();
 
-let currentUsername = "Guest";
-
-let currentColor = "#00ff66";
-
-let currentChatType = "global";
-
+let currentUsername = 'Guest';
+let currentColor = '#00ff66';
+let currentPhoto = '';
+let currentChatType = 'global';
 let selectedUser = null;
-
 let currentChatId = null;
 
-
-// AUTH
 function signUp(){
 
-    const email =
-        document.getElementById('email').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-    const password =
-        document.getElementById('password').value;
-
-    auth.createUserWithEmailAndPassword(
-        email,
-        password
-    )
-    .catch(err => alert(err.message));
+    auth.createUserWithEmailAndPassword(email,password)
+    .catch(err=>alert(err.message));
 
 }
 
 function login(){
 
-    const email =
-        document.getElementById('email').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-    const password =
-        document.getElementById('password').value;
-
-    auth.signInWithEmailAndPassword(
-        email,
-        password
-    )
-    .catch(err => alert(err.message));
+    auth.signInWithEmailAndPassword(email,password)
+    .catch(err=>alert(err.message));
 
 }
 
 function logout(){
 
     auth.signOut();
-
     location.reload();
 
 }
 
+function showPage(page){
 
-// AUTH STATE
-auth.onAuthStateChanged(user => {
+    document.getElementById('page-chat').style.display =
+    page === 'chat' ? 'block':'none';
+
+    document.getElementById('page-profile').style.display =
+    page === 'profile' ? 'block':'none';
+
+}
+
+function setOnlineStatus(){
+
+    const statusRef = db.ref(
+        'status/' + auth.currentUser.uid
+    );
+
+    statusRef.set({
+
+        online:true,
+
+        lastSeen:Date.now()
+
+    });
+
+    statusRef.onDisconnect().set({
+
+        online:false,
+
+        lastSeen:Date.now()
+
+    });
+
+}
+
+
+auth.onAuthStateChanged(user=>{
 
     if(user){
 
-        document.getElementById(
-            'auth-section'
-        ).style.display = 'none';
+        document.getElementById('auth-section').style.display='none';
 
-        document.getElementById(
-            'main-content'
-        ).style.display = 'block';
+        document.getElementById('main-content').style.display='block';
 
-        document.getElementById(
-            'user-email-display'
-        ).innerText =
-            "LOGGED IN: " + user.email;
+        document.getElementById('user-email-display').innerText =
+        'LOGGED IN: ' + user.email;
 
         db.ref('users/' + user.uid).set({
-
             email:user.email
-
         });
 
         loadProfile(user.uid);
@@ -367,23 +377,33 @@ auth.onAuthStateChanged(user => {
 
         openGlobalChat();
 
+        setOnlineStatus();
+
     }
 
 });
 
+async function updateProfile(){
 
-// PROFILE
-function updateProfile(){
+    const username = document.getElementById('username-input').value;
 
-    const username =
-        document.getElementById(
-            'username-input'
-        ).value;
+    const color = document.getElementById('color-input').value;
 
-    const color =
-        document.getElementById(
-            'color-input'
-        ).value;
+    const file = document.getElementById('profile-pic-input').files[0];
+
+    let photo = currentPhoto;
+
+    if(file){
+
+        const ref = storage.ref(
+            'profilePics/' + auth.currentUser.uid
+        );
+
+        await ref.put(file);
+
+        photo = await ref.getDownloadURL();
+
+    }
 
     db.ref(
         'profiles/' + auth.currentUser.uid
@@ -391,42 +411,40 @@ function updateProfile(){
 
         username:username,
 
-        color:color
+        color:color,
+
+        photo:photo
 
     });
 
     currentUsername = username;
-
     currentColor = color;
+    currentPhoto = photo;
 
-    alert("PROFILE UPDATED");
+    document.getElementById('profile-preview').src = photo;
+
+    alert('PROFILE UPDATED');
 
 }
 
 function loadProfile(uid){
 
     db.ref('profiles/' + uid)
-    .on('value', snap => {
+    .on('value',snap=>{
 
         if(snap.val()){
 
-            currentUsername =
-                snap.val().username ||
-                auth.currentUser.email;
+            currentUsername = snap.val().username || auth.currentUser.email;
 
-            currentColor =
-                snap.val().color ||
-                "#00ff66";
+            currentColor = snap.val().color || '#00ff66';
 
-            document.getElementById(
-                'username-input'
-            ).value =
-                currentUsername;
+            currentPhoto = snap.val().photo || '';
 
-            document.getElementById(
-                'color-input'
-            ).value =
-                currentColor;
+            document.getElementById('username-input').value = currentUsername;
+
+            document.getElementById('color-input').value = currentColor;
+
+            document.getElementById('profile-preview').src = currentPhoto;
 
         }
 
@@ -434,43 +452,53 @@ function loadProfile(uid){
 
 }
 
-
-// USERS
 function loadUsers(){
 
     db.ref('users')
-    .on('value', snap => {
+    .on('value',snap=>{
 
-        const usersDiv =
-            document.getElementById(
-                'users-list'
-            );
+        const usersDiv = document.getElementById('users-list');
 
-        usersDiv.innerHTML = "";
+        usersDiv.innerHTML='';
 
-        snap.forEach(child => {
+        snap.forEach(child=>{
 
             const user = child.val();
-
             const uid = child.key;
 
             if(uid !== auth.currentUser.uid){
 
-                const btn =
-                    document.createElement(
-                        'button'
-                    );
+                const btn = document.createElement('button');
 
-                btn.className = "user-btn";
+                btn.className='user-btn';
 
-                btn.textContent =
-                    user.email;
+                const statusDot = document.createElement('span');
 
-                btn.onclick = () =>
-                    openPrivateChat(
-                        uid,
-                        user.email
-                    );
+                statusDot.style.display='inline-block';
+                statusDot.style.width='10px';
+                statusDot.style.height='10px';
+                statusDot.style.borderRadius='50%';
+                statusDot.style.marginRight='10px';
+
+                const text = document.createElement('span');
+                text.textContent = user.email;
+
+                btn.appendChild(statusDot);
+                btn.appendChild(text);
+
+                btn.onclick = ()=>
+                openPrivateChat(uid,user.email);
+
+                db.ref('status/' + uid)
+                .on('value',s=>{
+
+                    if(s.val() && s.val().online){
+                        statusDot.style.background='#00ff66';
+                    }else{
+                        statusDot.style.background='red';
+                    }
+
+                });
 
                 usersDiv.appendChild(btn);
 
@@ -482,39 +510,25 @@ function loadUsers(){
 
 }
 
+function generateChatId(uid1,uid2){
 
-// CHAT IDS
-function generateChatId(uid1, uid2){
-
-    return [uid1, uid2]
-    .sort()
-    .join("_");
+    return [uid1,uid2].sort().join('_');
 
 }
 
-
-// GLOBAL CHAT
 function openGlobalChat(){
 
-    currentChatType = "global";
+    currentChatType='global';
 
-    selectedUser = null;
+    document.getElementById('chat-title').innerText='GLOBAL CHAT';
 
-    document.getElementById(
-        'chat-title'
-    ).innerText =
-        "GLOBAL CHAT";
+    document.getElementById('chat-box').innerHTML='';
 
-    document.getElementById(
-        'chat-box'
-    ).innerHTML = "";
-
-    db.ref('globalMessages')
-    .off();
+    db.ref('globalMessages').off();
 
     db.ref('globalMessages')
     .limitToLast(100)
-    .on('child_added', snap => {
+    .on('child_added',snap=>{
 
         renderMessage(snap.val());
 
@@ -522,92 +536,140 @@ function openGlobalChat(){
 
 }
 
+function openPrivateChat(uid,email){
 
-// PRIVATE CHAT
-function openPrivateChat(uid, email){
-
-    currentChatType = "private";
+    currentChatType='private';
 
     selectedUser = uid;
 
-    currentChatId =
-        generateChatId(
-            auth.currentUser.uid,
-            uid
-        );
+    currentChatId = generateChatId(
+        auth.currentUser.uid,
+        uid
+    );
 
-    document.getElementById(
-        'chat-title'
-    ).innerText =
-        "PRIVATE CHAT: " + email;
+    document.getElementById('chat-title').innerText =
+    'PRIVATE CHAT: ' + email;
 
-    document.getElementById(
-        'chat-box'
-    ).innerHTML = "";
+    document.getElementById('chat-box').innerHTML='';
 
-    db.ref(
-        'privateChats/' + currentChatId
-    ).off();
+    db.ref('privateChats/' + currentChatId).off();
 
-    db.ref(
-        'privateChats/' + currentChatId
-    )
+    db.ref('privateChats/' + currentChatId)
     .limitToLast(100)
-    .on('child_added', snap => {
+    .on('child_added',snap=>{
 
         renderMessage(snap.val());
 
     });
 
+    db.ref('typing/' + currentChatId)
+    .on('value',snap=>{
+
+        const status = document.getElementById('typing-status');
+
+        if(snap.val() && snap.val().user !== currentUsername){
+
+            status.textContent =
+            snap.val().user + ' is typing...';
+
+        }else{
+
+            status.textContent='';
+
+        }
+
+    });
+
 }
 
-
-// RENDER MESSAGE
 function renderMessage(m){
 
-    const div =
-        document.createElement('div');
+    const div = document.createElement('div');
 
-    div.className = "message";
+    div.className='message';
 
-    div.style.borderLeftColor =
-        m.color || "#00ff66";
+    div.style.borderLeftColor = m.color || '#00ff66';
+
+    const time = new Date(m.timestamp)
+    .toLocaleTimeString();
 
     div.innerHTML =
-        "<strong style='color:" +
-        (m.color || "#00ff66") +
-        "'>" +
-        m.name +
-        ":</strong><br>" +
-        m.text;
 
-    document.getElementById(
-        'chat-box'
-    ).appendChild(div);
+    "<strong style='color:" +
+    (m.color || '#00ff66') +
+    "'>" +
+    m.name +
+    "</strong> <small>" +
+    time +
+    "</small><br>" +
+    (m.text || '');
 
-    const box =
-        document.getElementById(
-            'chat-box'
-        );
+    if(m.image){
+
+        div.innerHTML +=
+        "<br><img class='chat-image' src='" +
+        m.image +
+        "'>";
+
+    }
+
+    if(m.sender === auth.currentUser.uid){
+
+        const del = document.createElement('button');
+
+        del.textContent='DELETE';
+
+        del.onclick = ()=>{
+
+            if(currentChatType === 'global'){
+
+                db.ref(
+                    'globalMessages/' + m.messageId
+                ).remove();
+
+            }else{
+
+                db.ref(
+                    'privateChats/' +
+                    currentChatId +
+                    '/' +
+                    m.messageId
+                ).remove();
+
+            }
+
+        };
+
+        div.appendChild(del);
+
+    }
+
+    document.getElementById('chat-box')
+    .appendChild(div);
+
+    document.getElementById('msg-sound').play();
+
+    const box = document.getElementById('chat-box');
 
     box.scrollTop = box.scrollHeight;
 
 }
 
-
-// SEND MESSAGE
 function sendMsg(){
 
-    const input =
-        document.getElementById(
-            'chat-input'
-        );
+    const input = document.getElementById('chat-input');
 
     const text = input.value;
 
-    if(text.trim() === "") return;
+    if(text.trim()==='') return;
+
+    const ref = currentChatType === 'global'
+    ? db.ref('globalMessages').push()
+    : db.ref('privateChats/' + currentChatId).push();
 
     const msg = {
+
+        messageId:ref.key,
 
         sender:auth.currentUser.uid,
 
@@ -617,45 +679,129 @@ function sendMsg(){
 
         color:currentColor,
 
+        photo:currentPhoto,
+
         timestamp:Date.now()
 
     };
 
-    if(currentChatType === "global"){
+    ref.set(msg);
 
-        db.ref('globalMessages').push(msg);
+    input.value='';
 
-    }else{
+}
 
-        db.ref(
-            'privateChats/' + currentChatId
-        ).push(msg);
+async function sendImage(){
+
+    const file = document.getElementById('image-input').files[0];
+
+    if(!file) return;
+
+    const storageRef = storage.ref(
+        'chatImages/' + Date.now()
+    );
+
+    await storageRef.put(file);
+
+    const url = await storageRef.getDownloadURL();
+
+    const ref = currentChatType === 'global'
+    ? db.ref('globalMessages').push()
+    : db.ref('privateChats/' + currentChatId).push();
+
+    ref.set({
+
+        messageId:ref.key,
+
+        sender:auth.currentUser.uid,
+
+        name:currentUsername,
+
+        image:url,
+
+        color:currentColor,
+
+        timestamp:Date.now()
+
+    });
+
+}
+
+
+document.getElementById('chat-input')
+.addEventListener('input',()=>{
+
+    if(currentChatType === 'private'){
+
+        db.ref('typing/' + currentChatId)
+        .set({
+
+            user:currentUsername,
+
+            typing:true
+
+        });
+
+        setTimeout(()=>{
+
+            db.ref('typing/' + currentChatId)
+            .remove();
+
+        },1500);
 
     }
 
-    input.value = "";
+});
+
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const chars='01';
+const fontSize=14;
+const columns = canvas.width/fontSize;
+const drops=[];
+
+for(let i=0;i<columns;i++){
+    drops[i]=1;
+}
+
+function draw(){
+
+    ctx.fillStyle='rgba(0,0,0,0.05)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle='#00ff66';
+    ctx.font=fontSize+'px monospace';
+
+    for(let i=0;i<drops.length;i++){
+
+        const text = chars[
+            Math.floor(Math.random()*chars.length)
+        ];
+
+        ctx.fillText(
+            text,
+            i*fontSize,
+            drops[i]*fontSize
+        );
+
+        if(
+            drops[i]*fontSize > canvas.height &&
+            Math.random() > 0.975
+        ){
+            drops[i]=0;
+        }
+
+        drops[i]++;
+
+    }
 
 }
 
-
-// NAVIGATION
-function showPage(page){
-
-    document.getElementById(
-        'page-chat'
-    ).style.display =
-        page === 'chat'
-        ? 'block'
-        : 'none';
-
-    document.getElementById(
-        'page-profile'
-    ).style.display =
-        page === 'profile'
-        ? 'block'
-        : 'none';
-
-}
+setInterval(draw,33);
 
 </script>
 
