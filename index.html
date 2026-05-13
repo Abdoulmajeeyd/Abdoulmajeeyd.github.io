@@ -10,130 +10,30 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <style>
-
-*{
-    box-sizing:border-box;
-}
-
-body{
-    margin:0;
-    background:black;
-    color:#00ff66;
-    font-family:Courier New, monospace;
-    overflow-x:hidden;
-}
-
-#matrix{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    z-index:-1;
-}
-
-.container{
-    width:95%;
-    max-width:1300px;
-    margin:auto;
-    padding-top:20px;
-}
-
-.panel{
-    background:rgba(0,0,0,0.9);
-    border:1px solid #00ff66;
-    border-radius:12px;
-    padding:15px;
-    margin-bottom:15px;
-    box-shadow:0 0 15px #00ff66;
-}
-
-input,button{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    background:black;
-    color:#00ff66;
-    border:1px solid #00ff66;
-    border-radius:8px;
-    font-family:Courier New, monospace;
-}
-
-button{
-    cursor:pointer;
-}
-
-button:hover{
-    background:#00ff66;
-    color:black;
-}
-
-.layout{
-    display:flex;
-    gap:15px;
-    flex-wrap:wrap;
-}
-
-.users-panel{
-    width:300px;
-}
-
-.chat-panel{
-    flex:1;
-}
-
-.chat-box{
-    height:500px;
-    overflow-y:auto;
-    border:1px solid #00ff66;
-    border-radius:10px;
-    padding:10px;
-    background:black;
-}
-
-.message{
-    background:#101010;
-    border-left:4px solid #00ff66;
-    border-radius:10px;
-    padding:10px;
-    margin-bottom:10px;
-    direction:ltr;
-    unicode-bidi:plaintext;
-    word-wrap:break-word;
-}
-
-.chat-input{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-}
-
-.chat-input input{
-    flex:1;
-    margin-top:0;
-}
-
-.user-btn{
-    margin-bottom:10px;
-}
-
-#typing-status{
-    margin-top:10px;
-    color:#888;
-}
-
-@media(max-width:900px){
-
-    .layout{
-        flex-direction:column;
-    }
-
-    .users-panel{
-        width:100%;
-    }
-
-}
-
+*{box-sizing:border-box;}
+body{margin:0;background:black;color:#00ff66;font-family:'Courier New',monospace;overflow-x:hidden;}
+#matrix{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;}
+.container{width:95%;max-width:1300px;margin:auto;padding-top:20px;}
+.panel{background:rgba(0,0,0,0.9);border:1px solid #00ff66;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 0 15px #00ff66;}
+input,button{width:100%;padding:12px;margin-top:10px;background:black;color:#00ff66;border:1px solid #00ff66;border-radius:8px;font-family:'Courier New',monospace;}
+button{cursor:pointer;}
+button:hover{background:#00ff66;color:black;}
+.layout{display:flex;gap:15px;flex-wrap:wrap;}
+.users-panel{width:300px;}
+.chat-panel{flex:1;}
+.chat-box{height:500px;overflow-y:auto;border:1px solid #00ff66;border-radius:10px;padding:10px;background:black;}
+.message{background:#101010;border-left:4px solid #00ff66;border-radius:10px;padding:10px;margin-bottom:10px;word-wrap:break-word;}
+.chat-input{display:flex;gap:10px;margin-top:10px;}
+.chat-input input{flex:1;margin-top:0;}
+.user-btn{margin-bottom:10px;}
+#typing-status{margin-top:10px;color:#888;font-size:12px;}
+.enc-badge{display:inline-block;background:#003311;border:1px solid #00ff66;border-radius:4px;padding:2px 6px;font-size:10px;margin-left:8px;vertical-align:middle;}
+.enc-lock{color:#00ff66;font-size:10px;}
+.msg-encrypted-note{color:#444;font-size:10px;margin-top:4px;}
+#e2e-status{padding:6px 10px;border-radius:6px;font-size:11px;margin-top:8px;}
+.e2e-on{color:#00ff66;border:1px solid #00ff66;background:#001a00;}
+.e2e-off{color:#ff6600;border:1px solid #ff6600;background:#1a0a00;}
+@media(max-width:900px){.layout{flex-direction:column;}.users-panel{width:100%;}}
 </style>
 </head>
 <body dir="ltr">
@@ -142,505 +42,521 @@ button:hover{
 
 <div class="container">
 
-<div id="auth-section" class="panel">
+  <!-- AUTH -->
+  <div id="auth-section" class="panel">
+    <h1>ANONYCHAT TERMINAL</h1>
+    <input type="email" id="email" placeholder="EMAIL">
+    <input type="password" id="password" placeholder="PASSWORD">
+    <button onclick="signUp()">SIGN UP</button>
+    <button onclick="login()">LOGIN</button>
+  </div>
 
-<h1>ANONYCHAT TERMINAL</h1>
+  <!-- MAIN -->
+  <div id="main-content" style="display:none;">
 
-<input type="email" id="email" placeholder="EMAIL">
+    <div class="panel">
+      <button onclick="showPage('chat')">CHAT</button>
+      <button onclick="showPage('profile')">PROFILE</button>
+      <button onclick="logout()">LOGOUT</button>
+    </div>
 
-<input type="password" id="password" placeholder="PASSWORD">
+    <div id="page-chat">
+      <div class="layout">
 
-<button onclick="signUp()">SIGN UP</button>
+        <div class="users-panel panel">
+          <h3>CHANNELS</h3>
+          <button onclick="openGlobalChat()">GLOBAL CHAT</button>
+          <hr style="border-color:#00ff66;">
+          <h3>PRIVATE USERS</h3>
+          <div id="users-list"></div>
+        </div>
 
-<button onclick="login()">LOGIN</button>
+        <div class="chat-panel panel">
+          <h2 id="chat-title">GLOBAL CHAT</h2>
+          <div id="e2e-status" class="e2e-off">⚠ E2E ENCRYPTION: OFF (Global Chat)</div>
+          <div id="chat-box" class="chat-box"></div>
+          <div id="typing-status"></div>
+          <div class="chat-input">
+            <input type="text" id="chat-input" placeholder="TYPE MESSAGE..." onkeydown="handleKey(event)">
+            <button onclick="sendMsg()">SEND</button>
+          </div>
+        </div>
 
-</div>
+      </div>
+    </div>
 
-<div id="main-content" style="display:none;">
+    <div id="page-profile" style="display:none;" class="panel">
+      <h2>PROFILE SETTINGS</h2>
+      <p id="user-email-display"></p>
+      <input type="text" id="username-input" placeholder="USERNAME">
+      <label>CHAT COLOR</label>
+      <input type="color" id="color-input" value="#00ff66">
+      <button onclick="updateProfile()">SAVE PROFILE</button>
+      <hr style="border-color:#00ff66;margin-top:20px;">
+      <h3>🔑 ENCRYPTION KEYS</h3>
+      <p style="font-size:12px;color:#888;">Your private key is stored only on this device. If you clear your browser data, you will lose access to past encrypted messages.</p>
+      <div id="key-status" style="color:#888;font-size:12px;">Checking keys...</div>
+      <button onclick="regenerateKeys()">REGENERATE MY KEYS</button>
+    </div>
 
-<div class="panel">
-
-<button onclick="showPage('chat')">CHAT</button>
-<button onclick="showPage('profile')">PROFILE</button>
-<button onclick="logout()">LOGOUT</button>
-
-</div>
-
-<div id="page-chat">
-
-<div class="layout">
-
-<div class="users-panel panel">
-
-<h3>CHANNELS</h3>
-
-<button onclick="openGlobalChat()">
-GLOBAL CHAT
-</button>
-
-<hr style="border-color:#00ff66;">
-
-<h3>PRIVATE USERS</h3>
-
-<div id="users-list"></div>
-
-</div>
-
-<div class="chat-panel panel">
-
-<h2 id="chat-title">GLOBAL CHAT</h2>
-
-<div id="chat-box" class="chat-box"></div>
-
-<div id="typing-status"></div>
-
-<div class="chat-input">
-
-<input type="text" id="chat-input" placeholder="TYPE MESSAGE...">
-
-<button onclick="sendMsg()">SEND</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div id="page-profile" style="display:none;" class="panel">
-
-<h2>PROFILE SETTINGS</h2>
-
-<p id="user-email-display"></p>
-
-<input type="text" id="username-input" placeholder="USERNAME">
-
-<label>CHAT COLOR</label>
-
-<input type="color" id="color-input" value="#00ff66">
-
-<button onclick="updateProfile()">
-SAVE PROFILE
-</button>
-
-</div>
-
-</div>
-
+  </div>
 </div>
 
 <script>
-
+/* ============================================================
+   FIREBASE CONFIG
+   ============================================================ */
 const firebaseConfig = {
-
-    apiKey: "AIzaSyAy19nnMz2BH-vJ0w27sfMYD6IhlWUothQ",
-    authDomain: "my-chat-944a0.firebaseapp.com",
-    projectId: "my-chat-944a0",
-    storageBucket: "my-chat-944a0.appspot.com",
-    messagingSenderId: "176386861788",
-    appId: "1:176386861788:web:b2cf1263b4774138c4a219",
-    databaseURL: "https://my-chat-944a0-default-rtdb.firebaseio.com"
-
+  apiKey: "AIzaSyAy19nnMz2BH-vJ0w27sfMYD6IhlWUothQ",
+  authDomain: "my-chat-944a0.firebaseapp.com",
+  projectId: "my-chat-944a0",
+  storageBucket: "my-chat-944a0.appspot.com",
+  messagingSenderId: "176386861788",
+  appId: "1:176386861788:web:b2cf1263b4774138c4a219",
+  databaseURL: "https://my-chat-944a0-default-rtdb.firebaseio.com"
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
-const db = firebase.database();
+const db   = firebase.database();
 
-let currentUsername='';
-let currentColor='#00ff66';
-let currentChatType='global';
-let currentChatId=null;
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentUsername  = '';
+let currentColor     = '#00ff66';
+let currentChatType  = 'global';
+let currentChatId    = null;
+let currentPeerUid   = null;
 
-function signUp(){
+// Crypto state
+let myPrivateKey     = null;   // CryptoKey (ECDH private)
+let myPublicKeyRaw   = null;   // ArrayBuffer (exported SPKI)
+let sharedSecretCache = {};    // uid -> CryptoKey (AES-GCM)
 
-    const email=document.getElementById('email').value;
-    const password=document.getElementById('password').value;
+/* ============================================================
+   E2E ENCRYPTION — Web Crypto API
+   ECDH (P-256) key exchange + AES-GCM-256 message encryption
+   Private key lives ONLY in localStorage — never sent to server
+   ============================================================ */
 
-    auth.createUserWithEmailAndPassword(email,password)
-    .catch(err=>alert(err.message));
+const ALGO_ECDH = { name: 'ECDH', namedCurve: 'P-256' };
+const ALGO_AES  = { name: 'AES-GCM', length: 256 };
 
+// --- Utility: ArrayBuffer <-> Base64 ---
+function ab2b64(buf) {
+  return btoa(String.fromCharCode(...new Uint8Array(buf)));
+}
+function b642ab(b64) {
+  const bin = atob(b64);
+  const buf = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+  return buf.buffer;
 }
 
-function login(){
-
-    const email=document.getElementById('email').value;
-    const password=document.getElementById('password').value;
-
-    auth.signInWithEmailAndPassword(email,password)
-    .catch(err=>alert(err.message));
-
+// --- Generate ECDH keypair ---
+async function generateECDHKeyPair() {
+  return crypto.subtle.generateKey(ALGO_ECDH, true, ['deriveKey']);
 }
 
-function logout(){
-
-    auth.signOut();
-    location.reload();
-
+// --- Export public key as Base64 SPKI ---
+async function exportPublicKey(pubKey) {
+  const raw = await crypto.subtle.exportKey('spki', pubKey);
+  return ab2b64(raw);
 }
 
-function showPage(page){
-
-    document.getElementById('page-chat').style.display=
-    page==='chat'?'block':'none';
-
-    document.getElementById('page-profile').style.display=
-    page==='profile'?'block':'none';
-
+// --- Export private key as Base64 PKCS8 ---
+async function exportPrivateKey(privKey) {
+  const raw = await crypto.subtle.exportKey('pkcs8', privKey);
+  return ab2b64(raw);
 }
 
-function setOnlineStatus(){
-
-    const statusRef=db.ref(
-        'status/'+auth.currentUser.uid
-    );
-
-    statusRef.set({
-        online:true,
-        lastSeen:Date.now()
-    });
-
-    statusRef.onDisconnect().set({
-        online:false,
-        lastSeen:Date.now()
-    });
-
+// --- Import ECDH public key from Base64 SPKI ---
+async function importPublicKey(b64) {
+  const raw = b642ab(b64);
+  return crypto.subtle.importKey('spki', raw, ALGO_ECDH, true, []);
 }
 
+// --- Import ECDH private key from Base64 PKCS8 ---
+async function importPrivateKey(b64) {
+  const raw = b642ab(b64);
+  return crypto.subtle.importKey('pkcs8', raw, ALGO_ECDH, true, ['deriveKey']);
+}
 
-auth.onAuthStateChanged(user=>{
+// --- Derive shared AES-GCM key from ECDH ---
+async function deriveSharedKey(privKey, peerPubKey) {
+  return crypto.subtle.deriveKey(
+    { name: 'ECDH', public: peerPubKey },
+    privKey,
+    ALGO_AES,
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
 
-    if(user){
+// --- AES-GCM Encrypt ---
+async function encryptMsg(aesKey, plaintext) {
+  const iv  = crypto.getRandomValues(new Uint8Array(12));
+  const enc = new TextEncoder();
+  const ct  = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, enc.encode(plaintext));
+  // Pack: iv (12 bytes) + ciphertext
+  const combined = new Uint8Array(12 + ct.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(ct), 12);
+  return ab2b64(combined.buffer);
+}
 
-        document.getElementById('auth-section').style.display='none';
+// --- AES-GCM Decrypt ---
+async function decryptMsg(aesKey, b64payload) {
+  const buf = new Uint8Array(b642ab(b64payload));
+  const iv  = buf.slice(0, 12);
+  const ct  = buf.slice(12);
+  const pt  = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, ct);
+  return new TextDecoder().decode(pt);
+}
 
-        document.getElementById('main-content').style.display='block';
+// --- Load or generate user's keypair from localStorage ---
+async function loadOrCreateKeyPair(uid) {
+  const storageKey = 'e2e_priv_' + uid;
+  const pubStorKey = 'e2e_pub_'  + uid;
+  let privB64 = localStorage.getItem(storageKey);
+  let pubB64  = localStorage.getItem(pubStorKey);
 
-        document.getElementById('user-email-display').innerText=
-        'LOGGED IN: '+user.email;
+  if (privB64 && pubB64) {
+    myPrivateKey  = await importPrivateKey(privB64);
+    myPublicKeyRaw = pubB64;
+    document.getElementById('key-status').textContent = '✅ Keys loaded from device storage.';
+  } else {
+    const kp    = await generateECDHKeyPair();
+    myPrivateKey  = kp.privateKey;
+    myPublicKeyRaw = await exportPublicKey(kp.publicKey);
+    privB64     = await exportPrivateKey(kp.privateKey);
+    localStorage.setItem(storageKey, privB64);
+    localStorage.setItem(pubStorKey, myPublicKeyRaw);
+    document.getElementById('key-status').textContent = '🔑 New keys generated and saved.';
+  }
 
-        db.ref('users/'+user.uid).set({
-            email:user.email
-        });
+  // Publish public key to Firebase (safe — this is the PUBLIC key only)
+  await db.ref('publicKeys/' + uid).set({ pubKey: myPublicKeyRaw });
+}
 
-        loadProfile(user.uid);
+// --- Regenerate keys (breaks old sessions) ---
+async function regenerateKeys() {
+  if (!confirm('This will generate new keys. You cannot decrypt old private messages after this. Continue?')) return;
+  const uid = auth.currentUser.uid;
+  localStorage.removeItem('e2e_priv_' + uid);
+  localStorage.removeItem('e2e_pub_'  + uid);
+  sharedSecretCache = {};
+  await loadOrCreateKeyPair(uid);
+  alert('Keys regenerated.');
+}
 
-        loadUsers();
+// --- Get or build shared AES key for a peer ---
+async function getSharedKey(peerUid) {
+  if (sharedSecretCache[peerUid]) return sharedSecretCache[peerUid];
+  const snap = await db.ref('publicKeys/' + peerUid).once('value');
+  if (!snap.exists()) throw new Error('Peer has no public key registered.');
+  const peerPubKey = await importPublicKey(snap.val().pubKey);
+  const shared     = await deriveSharedKey(myPrivateKey, peerPubKey);
+  sharedSecretCache[peerUid] = shared;
+  return shared;
+}
 
-        openGlobalChat();
+/* ============================================================
+   AUTH
+   ============================================================ */
+function signUp() {
+  const email = document.getElementById('email').value;
+  const pass  = document.getElementById('password').value;
+  auth.createUserWithEmailAndPassword(email, pass).catch(err => alert(err.message));
+}
+function login() {
+  const email = document.getElementById('email').value;
+  const pass  = document.getElementById('password').value;
+  auth.signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
+}
+function logout() {
+  auth.signOut();
+  location.reload();
+}
 
-        setOnlineStatus();
+/* ============================================================
+   AUTH STATE
+   ============================================================ */
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    document.getElementById('auth-section').style.display  = 'none';
+    document.getElementById('main-content').style.display  = 'block';
+    document.getElementById('user-email-display').innerText = 'LOGGED IN: ' + user.email;
 
-    }
+    await db.ref('users/' + user.uid).set({ email: user.email });
+    await loadOrCreateKeyPair(user.uid);
 
+    loadProfile(user.uid);
+    loadUsers();
+    openGlobalChat();
+    setOnlineStatus();
+  }
 });
 
-async function updateProfile(){
+/* ============================================================
+   ONLINE STATUS
+   ============================================================ */
+function setOnlineStatus() {
+  const ref = db.ref('status/' + auth.currentUser.uid);
+  ref.set({ online: true, lastSeen: Date.now() });
+  ref.onDisconnect().set({ online: false, lastSeen: Date.now() });
+}
 
-    try{
+/* ============================================================
+   PROFILE
+   ============================================================ */
+async function updateProfile() {
+  try {
+    const username = document.getElementById('username-input').value.trim();
+    const color    = document.getElementById('color-input').value;
+    await db.ref('profiles/' + auth.currentUser.uid).set({
+      username: username || auth.currentUser.email.split('@')[0],
+      color
+    });
+    currentUsername = username || auth.currentUser.email.split('@')[0];
+    currentColor    = color;
+    alert('PROFILE UPDATED');
+    loadUsers();
+  } catch(err) { alert(err.message); }
+}
 
-        const username=document.getElementById('username-input').value.trim();
-
-        const color=document.getElementById('color-input').value;
-
-        await db.ref(
-            'profiles/'+auth.currentUser.uid
-        ).set({
-
-            username:username || auth.currentUser.email.split('@')[0],
-            color:color
-
-        });
-
-        currentUsername=username || auth.currentUser.email.split('@')[0];
-
-        currentColor=color;
-
-        alert('PROFILE UPDATED');
-
-        loadUsers();
-
-    }catch(err){
-
-        alert(err.message);
-
+function loadProfile(uid) {
+  db.ref('profiles/' + uid).once('value').then(snap => {
+    if (snap.exists()) {
+      const d = snap.val();
+      currentUsername = d.username || auth.currentUser.email.split('@')[0];
+      currentColor    = d.color    || '#00ff66';
+      document.getElementById('username-input').value = currentUsername;
+      document.getElementById('color-input').value    = currentColor;
+    } else {
+      currentUsername = auth.currentUser.email.split('@')[0];
     }
-
+  });
 }
 
-function loadProfile(uid){
+function showPage(page) {
+  document.getElementById('page-chat').style.display    = page === 'chat'    ? 'block' : 'none';
+  document.getElementById('page-profile').style.display = page === 'profile' ? 'block' : 'none';
+}
 
-    db.ref('profiles/'+uid)
-    .once('value')
-    .then(snap=>{
+/* ============================================================
+   USERS LIST
+   ============================================================ */
+function loadUsers() {
+  db.ref('users').on('value', snap => {
+    const div = document.getElementById('users-list');
+    div.innerHTML = '';
+    snap.forEach(child => {
+      const user = child.val();
+      const uid  = child.key;
+      if (uid === auth.currentUser.uid) return;
 
-        if(snap.exists()){
+      const btn  = document.createElement('button');
+      btn.className = 'user-btn';
 
-            const data=snap.val();
+      const dot  = document.createElement('span');
+      dot.style.cssText = 'display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:10px;';
 
-            currentUsername=data.username || auth.currentUser.email.split('@')[0];
+      const txt  = document.createElement('span');
 
-            currentColor=data.color || '#00ff66';
+      db.ref('profiles/' + uid).on('value', ps => {
+        txt.textContent = (ps.val() && ps.val().username) ? ps.val().username : user.email.split('@')[0];
+      });
 
-            document.getElementById('username-input').value=currentUsername;
+      btn.appendChild(dot);
+      btn.appendChild(txt);
+      btn.onclick = () => openPrivateChat(uid, txt.textContent);
 
-            document.getElementById('color-input').value=currentColor;
+      db.ref('status/' + uid).on('value', s => {
+        dot.style.background = (s.val() && s.val().online) ? '#00ff66' : 'red';
+      });
 
-        }else{
-
-            currentUsername=auth.currentUser.email.split('@')[0];
-
-        }
-
+      div.appendChild(btn);
     });
-
+  });
 }
 
-function loadUsers(){
-
-    db.ref('users')
-    .on('value',snap=>{
-
-        const usersDiv=document.getElementById('users-list');
-
-        usersDiv.innerHTML='';
-
-        snap.forEach(child=>{
-
-            const user=child.val();
-            const uid=child.key;
-
-            if(uid!==auth.currentUser.uid){
-
-                const btn=document.createElement('button');
-
-                btn.className='user-btn';
-
-                const statusDot=document.createElement('span');
-
-                statusDot.style.display='inline-block';
-                statusDot.style.width='10px';
-                statusDot.style.height='10px';
-                statusDot.style.borderRadius='50%';
-                statusDot.style.marginRight='10px';
-
-                const text=document.createElement('span');
-
-                db.ref('profiles/'+uid)
-                .on('value',profileSnap=>{
-
-                    if(profileSnap.val() && profileSnap.val().username){
-
-                        text.textContent=profileSnap.val().username;
-
-                    }else{
-
-                        text.textContent=user.email.split('@')[0];
-
-                    }
-
-                });
-
-                btn.appendChild(statusDot);
-                btn.appendChild(text);
-
-                btn.onclick=()=>
-                openPrivateChat(uid,text.textContent);
-
-                db.ref('status/'+uid)
-                .on('value',s=>{
-
-                    if(s.val() && s.val().online){
-                        statusDot.style.background='#00ff66';
-                    }else{
-                        statusDot.style.background='red';
-                    }
-
-                });
-
-                usersDiv.appendChild(btn);
-
-            }
-
-        });
-
-    });
-
+function generateChatId(uid1, uid2) {
+  return [uid1, uid2].sort().join('_');
 }
 
-function generateChatId(uid1,uid2){
-
-    return [uid1,uid2].sort().join('_');
-
+/* ============================================================
+   GLOBAL CHAT (plaintext — no shared secret possible)
+   ============================================================ */
+function openGlobalChat() {
+  currentChatType  = 'global';
+  currentPeerUid   = null;
+  currentChatId    = null;
+  document.getElementById('chat-title').innerText = 'GLOBAL CHAT';
+  document.getElementById('e2e-status').className = 'e2e-off';
+  document.getElementById('e2e-status').textContent = '⚠ E2E ENCRYPTION: OFF (Global Chat — visible to all)';
+  document.getElementById('chat-box').innerHTML = '';
+  db.ref('globalMessages').off();
+  db.ref('globalMessages').limitToLast(100).on('child_added', snap => {
+    renderMessage(snap.val(), false);
+  });
 }
 
-function openGlobalChat(){
+/* ============================================================
+   PRIVATE CHAT (E2E encrypted)
+   ============================================================ */
+async function openPrivateChat(uid, username) {
+  currentChatType = 'private';
+  currentPeerUid  = uid;
+  currentChatId   = generateChatId(auth.currentUser.uid, uid);
 
-    currentChatType='global';
+  document.getElementById('chat-title').innerText = 'PRIVATE CHAT: ' + username;
+  document.getElementById('e2e-status').className = 'e2e-on';
+  document.getElementById('e2e-status').textContent = '🔒 E2E ENCRYPTED — Only you and ' + username + ' can read this.';
+  document.getElementById('chat-box').innerHTML = '';
 
-    document.getElementById('chat-title').innerText='GLOBAL CHAT';
-
-    document.getElementById('chat-box').innerHTML='';
-
-    db.ref('globalMessages').off();
-
-    db.ref('globalMessages')
-    .limitToLast(100)
-    .on('child_added',snap=>{
-
-        renderMessage(snap.val());
-
-    });
-
+  db.ref('privateChats/' + currentChatId).off();
+  db.ref('privateChats/' + currentChatId).limitToLast(100).on('child_added', async snap => {
+    await renderMessage(snap.val(), true);
+  });
 }
 
-function openPrivateChat(uid,username){
+/* ============================================================
+   RENDER MESSAGE
+   ============================================================ */
+async function renderMessage(m, isEncrypted) {
+  const div  = document.createElement('div');
+  div.className = 'message';
+  div.style.borderLeftColor = m.color || '#00ff66';
 
-    currentChatType='private';
+  const time = new Date(m.timestamp).toLocaleTimeString();
 
-    currentChatId=generateChatId(auth.currentUser.uid,uid);
+  let displayText = '';
 
-    document.getElementById('chat-title').innerText=
-    'PRIVATE CHAT: '+username;
-
-    document.getElementById('chat-box').innerHTML='';
-
-    db.ref('privateChats/'+currentChatId).off();
-
-    db.ref('privateChats/'+currentChatId)
-    .limitToLast(100)
-    .on('child_added',snap=>{
-
-        renderMessage(snap.val());
-
-    });
-
-}
-
-function renderMessage(m){
-
-    const div=document.createElement('div');
-
-    div.className='message';
-
-    div.style.borderLeftColor=m.color || '#00ff66';
-
-    const time=new Date(m.timestamp)
-    .toLocaleTimeString();
-
-    div.innerHTML=
-
-    "<strong style='color:"+
-    (m.color || '#00ff66')+
-    "'>"+
-    m.name+
-    "</strong> <small>"+
-    time+
-    "</small><br>"+
-    (m.text || '');
-
-    if(m.sender===auth.currentUser.uid){
-
-        const del=document.createElement('button');
-
-        del.textContent='DELETE';
-
-        del.onclick=()=>{
-
-            if(currentChatType==='global'){
-
-                db.ref('globalMessages/'+m.messageId).remove();
-
-            }else{
-
-                db.ref('privateChats/'+currentChatId+'/'+m.messageId).remove();
-
-            }
-
-        };
-
-        div.appendChild(del);
-
+  if (isEncrypted && m.ciphertext) {
+    try {
+      const aesKey  = await getSharedKey(
+        m.sender === auth.currentUser.uid ? currentPeerUid : m.sender
+      );
+      displayText = await decryptMsg(aesKey, m.ciphertext);
+    } catch(e) {
+      displayText = '[🔐 Cannot decrypt — key mismatch or corrupted]';
     }
+  } else {
+    displayText = m.text || '';
+  }
 
-    document.getElementById('chat-box').appendChild(div);
+  div.innerHTML =
+    "<strong style='color:" + (m.color || '#00ff66') + "'>" + escapeHtml(m.name) + "</strong>" +
+    (isEncrypted ? " <span class='enc-badge enc-lock'>🔒 E2E</span>" : '') +
+    " <small>" + time + "</small><br>" +
+    escapeHtml(displayText);
 
-    const box=document.getElementById('chat-box');
+  if (m.sender === auth.currentUser.uid) {
+    const del = document.createElement('button');
+    del.textContent = 'DELETE';
+    del.style.cssText = 'width:auto;padding:4px 8px;margin-top:6px;font-size:11px;';
+    del.onclick = () => {
+      if (currentChatType === 'global') {
+        db.ref('globalMessages/' + m.messageId).remove();
+      } else {
+        db.ref('privateChats/' + currentChatId + '/' + m.messageId).remove();
+      }
+      div.remove();
+    };
+    div.appendChild(del);
+  }
 
-    box.scrollTop=box.scrollHeight;
-
+  document.getElementById('chat-box').appendChild(div);
+  const box = document.getElementById('chat-box');
+  box.scrollTop = box.scrollHeight;
 }
 
-function sendMsg(){
+/* ============================================================
+   SEND MESSAGE
+   ============================================================ */
+async function sendMsg() {
+  const input = document.getElementById('chat-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  input.value = '';
 
-    const input=document.getElementById('chat-input');
-
-    const text=input.value;
-
-    if(text.trim()==='') return;
-
-    const ref=currentChatType==='global'
-    ? db.ref('globalMessages').push()
-    : db.ref('privateChats/'+currentChatId).push();
-
+  if (currentChatType === 'global') {
+    // Global: store plaintext (no shared secret)
+    const ref = db.ref('globalMessages').push();
     ref.set({
-
-        messageId:ref.key,
-        sender:auth.currentUser.uid,
-        name:currentUsername,
-        text:text,
-        color:currentColor,
-        timestamp:Date.now()
-
+      messageId: ref.key,
+      sender:    auth.currentUser.uid,
+      name:      currentUsername,
+      text:      text,
+      color:     currentColor,
+      timestamp: Date.now()
     });
 
-    input.value='';
+  } else {
+    // Private: E2E encrypt for BOTH parties
+    try {
+      // Encrypt once with MY shared key (derived from peer's pub key)
+      // Both sides derive the same AES key via ECDH, so one ciphertext works for both
+      const aesKey     = await getSharedKey(currentPeerUid);
+      const ciphertext = await encryptMsg(aesKey, text);
 
-}
-
-const canvas=document.getElementById('matrix');
-const ctx=canvas.getContext('2d');
-
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-
-const chars='01';
-const fontSize=14;
-const columns=canvas.width/fontSize;
-const drops=[];
-
-for(let i=0;i<columns;i++){
-    drops[i]=1;
-}
-
-function draw(){
-
-    ctx.fillStyle='rgba(0,0,0,0.05)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    ctx.fillStyle='#00ff66';
-    ctx.font=fontSize+'px monospace';
-
-    for(let i=0;i<drops.length;i++){
-
-        const text=chars[Math.floor(Math.random()*chars.length)];
-
-        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-
-        if(drops[i]*fontSize>canvas.height && Math.random()>0.975){
-            drops[i]=0;
-        }
-
-        drops[i]++;
-
+      const ref = db.ref('privateChats/' + currentChatId).push();
+      ref.set({
+        messageId:  ref.key,
+        sender:     auth.currentUser.uid,
+        name:       currentUsername,
+        ciphertext: ciphertext,   // ← encrypted payload only, no plaintext
+        color:      currentColor,
+        timestamp:  Date.now()
+      });
+    } catch(e) {
+      alert('Encryption failed: ' + e.message);
     }
-
+  }
 }
 
-setInterval(draw,33);
+function handleKey(e) {
+  if (e.key === 'Enter') sendMsg();
+}
 
+/* ============================================================
+   SECURITY UTILITY
+   ============================================================ */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ============================================================
+   MATRIX RAIN
+   ============================================================ */
+const canvas  = document.getElementById('matrix');
+const ctx     = canvas.getContext('2d');
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
+const chars   = '01';
+const fontSize= 14;
+const columns = Math.floor(canvas.width / fontSize);
+const drops   = Array(columns).fill(1);
+
+function draw() {
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff66';
+  ctx.font = fontSize + 'px monospace';
+  for (let i = 0; i < drops.length; i++) {
+    const text = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+setInterval(draw, 33);
 </script>
 
 </body>
